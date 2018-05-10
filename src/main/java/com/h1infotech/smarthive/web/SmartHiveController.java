@@ -1,19 +1,24 @@
 package com.h1infotech.smarthive.web;
 
+import com.h1infotech.smarthive.common.Response;
+import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.domain.Partner;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import com.h1infotech.smarthive.service.SmartHiveService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
 public class SmartHiveController {
+    @Autowired
+    private SmartHiveService smartHiveService;
+
     @GetMapping(path = "/partners")
     @ResponseBody
-    public List<Partner> getPartners() {
-        return null;
+    public Response getPartners() {
+        return Response.success(smartHiveService.getPartners());
     }
 
     @PostMapping(path = "/login")
@@ -24,7 +29,8 @@ public class SmartHiveController {
 
     @PostMapping(path = "/register")
     @ResponseBody
-    public List<Partner> register() {
+    public Response register(@RequestBody BeeFarmer farmer) {
+        smartHiveService.register(farmer);
         return null;
     }
 
