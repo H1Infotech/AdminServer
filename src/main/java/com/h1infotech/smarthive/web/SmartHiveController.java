@@ -27,7 +27,7 @@ public class SmartHiveController {
         try {
             return Response.success(authService.login(loginRequest.getName(), loginRequest.getPassword()));
         } catch (AuthenticationException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException("login.password.error");
         }
     }
 

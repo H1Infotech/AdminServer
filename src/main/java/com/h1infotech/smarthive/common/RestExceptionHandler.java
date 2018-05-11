@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -19,7 +20,7 @@ public class RestExceptionHandler {
     @Autowired
     private MessageSource messageSource;
 
-    @ResponseStatus(value = HttpStatus.OK)
+    @ExceptionHandler(Exception.class)
     @ResponseBody
     public Response handleRuntimeException(HttpServletRequest req, RuntimeException ex) {
         String errorMessage = localizeErrorMessage(ex.getMessage());
