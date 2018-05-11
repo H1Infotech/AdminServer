@@ -4,11 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -16,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Entity
+@Table(name = "beeFarmer")
 public class BeeFarmer implements Serializable, UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +21,7 @@ public class BeeFarmer implements Serializable, UserDetails {
     private String mobile;
     private String email;
     private String address;
+    @JsonIgnore
     private String password;
     private Long partnerId;
     private Date createDate = new Date();
@@ -72,10 +70,9 @@ public class BeeFarmer implements Serializable, UserDetails {
 
     @Override
     @JsonIgnore
+    @Transient
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Stream.of("ROLE_USER")
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return Stream.of("USER").map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
     public String getPassword() {
@@ -89,24 +86,28 @@ public class BeeFarmer implements Serializable, UserDetails {
 
     @Override
     @JsonIgnore
+    @Transient
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
     @JsonIgnore
+    @Transient
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @JsonIgnore
     @Override
+    @Transient
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
     @JsonIgnore
+    @Transient
     public boolean isEnabled() {
         return true;
     }

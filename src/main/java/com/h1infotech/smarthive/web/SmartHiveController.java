@@ -3,8 +3,14 @@ package com.h1infotech.smarthive.web;
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.domain.Partner;
+import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.service.SmartHiveService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -14,6 +20,8 @@ import java.util.List;
 public class SmartHiveController {
     @Autowired
     private SmartHiveService smartHiveService;
+    @Autowired
+    private AuthService authService;
 
     @GetMapping(path = "/partners")
     @ResponseBody
@@ -23,15 +31,19 @@ public class SmartHiveController {
 
     @PostMapping(path = "/login")
     @ResponseBody
-    public List<Partner> login() {
-        return null;
+    public Response login(@RequestBody LoginRequest loginRequest) {
+        try {
+            return Response.success(authService.login(loginRequest.getName(), loginRequest.getPassword()));
+        } catch (AuthenticationException ex) {
+            return Response.fail(ex.getMessage());
+        }
     }
 
     @PostMapping(path = "/register")
     @ResponseBody
     public Response register(@RequestBody BeeFarmer farmer) {
-        smartHiveService.register(farmer);
-        return null;
+        BeeFarmer beeFarmer = smartHiveService.register(farmer);
+        return Response.success(beeFarmer);
     }
 
     @PostMapping(path = "/logout")

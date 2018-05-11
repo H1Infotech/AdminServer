@@ -30,6 +30,6 @@ public class Response {
     }
 
     public static Response fail(final String message) {
-        return new Response(FAIL_CODE, null, null);
+        return new Response(FAIL_CODE, null, message);
     }
 }
