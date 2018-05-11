@@ -1,5 +1,8 @@
 package com.h1infotech.smarthive.common;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response {
     private static final int SUCCESS_CODE = 0;
     private static final int FAIL_CODE = 1;
