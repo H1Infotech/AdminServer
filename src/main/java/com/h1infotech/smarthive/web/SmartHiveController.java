@@ -2,19 +2,11 @@ package com.h1infotech.smarthive.web;
 
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.BeeFarmer;
-import com.h1infotech.smarthive.domain.Partner;
 import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.service.SmartHiveService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
-import java.util.List;
 
 @RestController
 public class SmartHiveController {
@@ -35,7 +27,7 @@ public class SmartHiveController {
         try {
             return Response.success(authService.login(loginRequest.getName(), loginRequest.getPassword()));
         } catch (AuthenticationException ex) {
-            return Response.fail(ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 
@@ -48,7 +40,7 @@ public class SmartHiveController {
 
     @PostMapping(path = "/logout")
     @ResponseBody
-    public List<Partner> logout() {
+    public Response logout() {
         return null;
     }
 
