@@ -1,12 +1,12 @@
 package com.h1infotech.smarthive.common;
 
+import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.BeeFarmer;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 @Service(value = "userDetailsServiceImpl")
 public class UserDetailsServiceImpl implements UserDetailsService {

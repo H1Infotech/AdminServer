@@ -1,15 +1,14 @@
 package com.h1infotech.smarthive.service;
 
-import com.h1infotech.smarthive.domain.BeeFarmer;
+import java.util.List;
+import javax.transaction.Transactional;
+import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.Partner;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
+import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.repository.PartnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.List;
 
 @Service(value = "smartHiveService")
 @Transactional

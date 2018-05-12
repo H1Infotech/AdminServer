@@ -1,16 +1,16 @@
 package com.h1infotech.smarthive.service;
 
-import com.h1infotech.smarthive.common.JwtTokenUtil;
+import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.BeeFarmer;
+import com.h1infotech.smarthive.common.JwtTokenUtil;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @Service(value = "authService")
 public class AuthServiceImpl implements AuthService {

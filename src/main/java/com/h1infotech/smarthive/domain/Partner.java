@@ -1,7 +1,7 @@
 package com.h1infotech.smarthive.domain;
 
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "partner")
