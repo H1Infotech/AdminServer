@@ -21,7 +21,7 @@ public class AuthController {
     @ResponseBody
     public Response login(@RequestBody LoginRequest loginRequest) {
         try {
-            return Response.success(authService.login(loginRequest.getName(), loginRequest.getPassword()));
+            return Response.success(authService.login(loginRequest.getUserName(), loginRequest.getPassword()));
         } catch (AuthenticationException ex) {
             throw new RuntimeException("login.password.error");
         }
