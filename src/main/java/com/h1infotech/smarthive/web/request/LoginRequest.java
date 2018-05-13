@@ -1,4 +1,4 @@
-package com.h1infotech.smarthive.web;
+package com.h1infotech.smarthive.web.request;
 
 import com.h1infotech.smarthive.common.BasePOJO;
 
