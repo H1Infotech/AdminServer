@@ -24,6 +24,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    
     @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 

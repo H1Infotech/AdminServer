@@ -1,14 +1,13 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.mysql.jdbc.StringUtils;
+import com.h1infotech.smarthive.domain.Partner;
 import com.h1infotech.smarthive.common.Response;
 import org.springframework.web.bind.annotation.*;
 import com.h1infotech.smarthive.domain.BeeFarmer;
-import com.h1infotech.smarthive.domain.Partner;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.service.SmartHiveService;
@@ -25,7 +24,7 @@ public class SmartHiveController {
 	
 	@Autowired
     private SmartHiveService smartHiveService;
-    
+	
     @GetMapping(path = "/partners")
     @ResponseBody
     public Response<List<Partner>> getPartners() {
@@ -66,5 +65,9 @@ public class SmartHiveController {
     public Response<String> logout() {
         return null;
     }
+    
+//    @PostMapping(path = "/logout")
+//    @ResponseBody
+//    public Response<>
 
 }
