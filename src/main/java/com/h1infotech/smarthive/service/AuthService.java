@@ -6,9 +6,7 @@ import org.springframework.security.core.AuthenticationException;
 public interface AuthService {
     BeeFarmer register(BeeFarmer farmer);
 
-    String login(String userName, String password) throws AuthenticationException;
-
-    String logout(String token);
+    Object login(String userName, String password) throws AuthenticationException;
 
     String refreshToken(String token);
 }

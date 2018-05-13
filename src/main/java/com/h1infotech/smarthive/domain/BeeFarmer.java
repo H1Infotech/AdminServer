@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
@@ -27,6 +28,8 @@ public class BeeFarmer implements Serializable, UserDetails {
     private Date createDate = new Date();
     private Date updateDate;
     private Integer status = 0;
+    @Transient
+    private String authToken;
 
     public Long getId() {
         return id;
@@ -146,5 +149,13 @@ public class BeeFarmer implements Serializable, UserDetails {
 
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 }

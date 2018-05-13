@@ -1,10 +1,11 @@
-package com.h1infotech.smarthive.web;
+package com.h1infotech.smarthive.web.request;
 
-public class LoginRequest {
+import com.h1infotech.smarthive.domain.BeeFarmer;
+
+public class RegisterRequest {
     private String name;
     private String password;
     private String mobile;
-    private String certCode;
 
     public String getName() {
         return name;
@@ -30,11 +31,11 @@ public class LoginRequest {
         this.mobile = mobile;
     }
 
-    public String getCertCode() {
-        return certCode;
-    }
-
-    public void setCertCode(String certCode) {
-        this.certCode = certCode;
+    public BeeFarmer getBeeFarmer() {
+        BeeFarmer beeFarmer = new BeeFarmer();
+        beeFarmer.setName(this.getName());
+        beeFarmer.setPassword(this.getPassword());
+        beeFarmer.setMobile(this.getMobile());
+        return beeFarmer;
     }
 }

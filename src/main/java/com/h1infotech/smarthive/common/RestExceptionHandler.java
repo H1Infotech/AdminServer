@@ -22,7 +22,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public Response handleRuntimeException(HttpServletRequest req, RuntimeException ex) {
+    public Response handleRuntimeException(HttpServletRequest req, Exception ex) {
         String errorMessage = localizeErrorMessage(ex.getMessage());
         return Response.fail(errorMessage);
     }
