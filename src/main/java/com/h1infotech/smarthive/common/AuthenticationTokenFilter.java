@@ -25,6 +25,7 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
     
+    
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
