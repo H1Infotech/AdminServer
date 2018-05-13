@@ -4,9 +4,13 @@ public enum BizCodeEnum {
 
 	SERVICE_SUCCESS("000000","Service Success"),
 	LOGIN_ERROR("000010","Login Error"),
-	REGISTER_ERROR("000020","Register Error"),
+	REGISTER_ERROR("000020","User Register Error"),
+	REGISTER_USER_EXIST_ERROR("000021","User Already Exists"),
+	NO_USER_INFO("000030","No User Information"),
+	DATABASE_ACCESS_ERROR("000040","Database Access Error"),
 	ILLEGAL_INPUT("000090","Illegal Input Parameter(s)"),
 	SERVICE_ERROR("999999","Service Error"),
+	
 	
 	;
 	

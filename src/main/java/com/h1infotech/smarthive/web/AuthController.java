@@ -29,9 +29,9 @@ public class AuthController {
         try {
         	logger.info("====Catching the Request for Login: " + loginRequest + "====");
             return Response.success(authService.login(loginRequest.getUserName(), loginRequest.getPassword()));
-        } catch (BusinessException ex) {
-        	logger.error(ex.getMessage(), ex);
-            return Response.fail(BizCodeEnum.LOGIN_ERROR);
+        } catch (BusinessException e) {
+        	logger.error(e.getMessage(), e);
+            return Response.fail(e.getCode(), e.getMessage());
         } catch(Exception e) {
         	logger.error("Login Error", e);
         	return Response.fail(BizCodeEnum.LOGIN_ERROR);
@@ -42,12 +42,12 @@ public class AuthController {
     @ResponseBody
     public Response<Object> register(@RequestBody RegisterRequest registerRequest) {
         try {
-        	logger.info("====Catching the Request for Login: " + registerRequest + "====");
+        	logger.info("====Catching the Request for Register: " + registerRequest + "====");
             BeeFarmer beeFarmer = authService.register(registerRequest.getBeeFarmer());
             return Response.success(beeFarmer);
-        } catch (BusinessException ex) {
-        	logger.error(ex.getMessage(), ex);
-            return Response.fail(BizCodeEnum.REGISTER_ERROR);
+        } catch (BusinessException e) {
+        	logger.error(e.getMessage(), e);
+            return Response.fail(e.getCode(), e.getMessage());
         } catch(Exception e) {
         	logger.error("Register Error", e);
         	return Response.fail(BizCodeEnum.REGISTER_ERROR);

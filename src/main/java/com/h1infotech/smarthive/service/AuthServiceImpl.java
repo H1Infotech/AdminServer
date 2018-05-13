@@ -35,29 +35,21 @@ public class AuthServiceImpl implements AuthService {
     
     @Override
     public BeeFarmer register(BeeFarmer farmer) {
-    	try {
-    		BeeFarmer registeredFarmer = beeFarmerRepository.findDistinctFirstByName(farmer.getName());
-    		if (registeredFarmer != null) throw new IllegalArgumentException("user.exists.error");
-    		farmer.setPassword(bCryptPasswordEncoder.encode(farmer.getPassword()));
-    		return beeFarmerRepository.save(farmer);
-    	} catch(Exception e) {
-    		throw new BusinessException(BizCodeEnum.REGISTER_ERROR, e);
-    	}
+    	BeeFarmer registeredFarmer = beeFarmerRepository.findDistinctFirstByName(farmer.getName());
+    	if (registeredFarmer != null) throw new BusinessException(BizCodeEnum.REGISTER_ERROR);
+    	farmer.setPassword(bCryptPasswordEncoder.encode(farmer.getPassword()));
+    	return beeFarmerRepository.save(farmer);
     }
 
     @Override
     public Object login(String userName, String password) throws AuthenticationException {
-    	try {
-    		UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userName, password);
-    		final Authentication authentication = authenticationManager.authenticate(upToken);
-    		SecurityContextHolder.getContext().setAuthentication(authentication);
-    		final String token = jwtTokenUtil.generateToken(userName);
-    		((BeeFarmer) authentication.getPrincipal()).setAuthToken(token);
-    		stringRedisTemplate.opsForValue().set(token, "true");
-    		return authentication.getPrincipal();
-    	}catch(Exception e) {
-    		throw new BusinessException(BizCodeEnum.LOGIN_ERROR, e);
-    	}
+    	UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userName, password);
+    	final Authentication authentication = authenticationManager.authenticate(upToken);
+    	SecurityContextHolder.getContext().setAuthentication(authentication);
+    	final String token = jwtTokenUtil.generateToken(userName);
+    	((BeeFarmer) authentication.getPrincipal()).setAuthToken(token);
+    	stringRedisTemplate.opsForValue().set(token, "true");
+    	return authentication.getPrincipal();
     }
 
     @Override
