@@ -3,36 +3,51 @@ package com.h1infotech.smarthive.common;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Response {
-    private static final int SUCCESS_CODE = 0;
-    private static final int FAIL_CODE = 1;
-    private final int ret;
-    private final Object data;
-    private final String message;
+public class Response<T> {
 
-    private Response(int ret, Object data, String message) {
-        this.ret = ret;
+    private final T data;
+    private final String responseCode;
+    private final String responseMessage;
+
+    private Response(BizCodeEnum bizCodeEnum) {
+    	this.data = null;
+    	this.responseCode = bizCodeEnum.getCode();
+    	this.responseMessage = bizCodeEnum.getMessage();
+    }
+
+    private Response(BizCodeEnum bizCodeEnum, T data) {
         this.data = data;
-        this.message = message;
+    	this.responseCode = bizCodeEnum.getCode();
+    	this.responseMessage = bizCodeEnum.getMessage();
+    }
+    
+    private Response(String responseCode, String responseMessage, T data) {
+        this.data = data;
+    	this.responseCode = responseCode;
+        this.responseMessage = responseMessage;
     }
 
-    public int getRet() {
-        return ret;
-    }
+	public String getResponseCode() {
+		return responseCode;
+	}
 
-    public Object getData() {
+	public String getResponseMessage() {
+		return responseMessage;
+	}
+
+	public Object getData() {
         return data;
     }
 
-    public String getMessage() {
-        return message;
+    public static <T> Response<T> success(final T data) {
+        return new Response<T>(BizCodeEnum.SERVICE_SUCCESS, data);
     }
 
-    public static Response success(final Object data) {
-        return new Response(SUCCESS_CODE, data, null);
+    public static <T> Response<T> fail(BizCodeEnum bizCodeEnum) {
+        return new Response<T>(bizCodeEnum);
     }
-
-    public static Response fail(final String message) {
-        return new Response(FAIL_CODE, null, message);
+    
+    public static <T> Response<T> fail(String code, String response) {
+    	return new Response<T>(code, response, null);
     }
 }

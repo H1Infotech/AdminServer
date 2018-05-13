@@ -19,9 +19,9 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public Response handleRuntimeException(HttpServletRequest req, RuntimeException ex) {
+    public Response<String> handleRuntimeException(HttpServletRequest req, RuntimeException ex) {
         String errorMessage = localizeErrorMessage(ex.getMessage());
-        return Response.fail(errorMessage);
+        return Response.fail(BizCodeEnum.SERVICE_ERROR.getCode(), errorMessage);
     }
 
     private String localizeErrorMessage(String errorCode) {

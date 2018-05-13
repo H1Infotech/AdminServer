@@ -13,10 +13,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Service(value = "smartHiveService")
 @Transactional
 public class SmartHiveServiceImpl implements SmartHiveService {
-    @Autowired
-    private BeeFarmerRepository beeFarmerRepository;
-    @Autowired
+	
+	@Autowired
     private PartnerRepository partnerRepository;
+    
+	@Autowired
+    private BeeFarmerRepository beeFarmerRepository;
+    
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
