@@ -4,8 +4,10 @@ public enum BizCodeEnum {
 
 	SERVICE_SUCCESS("000000","Service Success"),
 	LOGIN_ERROR("000010","Login Error"),
-	ILLEGAL_INPUT("000020","Illegal Input Parameter(s)"),
+	REGISTER_ERROR("000020","Register Error"),
+	ILLEGAL_INPUT("000090","Illegal Input Parameter(s)"),
 	SERVICE_ERROR("999999","Service Error"),
+	
 	;
 	
 	private String code;
