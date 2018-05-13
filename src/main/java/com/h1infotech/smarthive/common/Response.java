@@ -4,38 +4,37 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response<T> {
-
     private final T data;
     private final String responseCode;
     private final String responseMessage;
 
     private Response(BizCodeEnum bizCodeEnum) {
-    	this.data = null;
-    	this.responseCode = bizCodeEnum.getCode();
-    	this.responseMessage = bizCodeEnum.getMessage();
+        this.data = null;
+        this.responseCode = bizCodeEnum.getCode();
+        this.responseMessage = bizCodeEnum.getMessage();
     }
 
     private Response(BizCodeEnum bizCodeEnum, T data) {
         this.data = data;
-    	this.responseCode = bizCodeEnum.getCode();
-    	this.responseMessage = bizCodeEnum.getMessage();
+        this.responseCode = bizCodeEnum.getCode();
+        this.responseMessage = bizCodeEnum.getMessage();
     }
-    
+
     private Response(String responseCode, String responseMessage, T data) {
         this.data = data;
-    	this.responseCode = responseCode;
+        this.responseCode = responseCode;
         this.responseMessage = responseMessage;
     }
 
-	public String getResponseCode() {
-		return responseCode;
-	}
+    public String getResponseCode() {
+        return responseCode;
+    }
 
-	public String getResponseMessage() {
-		return responseMessage;
-	}
+    public String getResponseMessage() {
+        return responseMessage;
+    }
 
-	public Object getData() {
+    public Object getData() {
         return data;
     }
 
@@ -46,8 +45,12 @@ public class Response<T> {
     public static <T> Response<T> fail(BizCodeEnum bizCodeEnum) {
         return new Response<T>(bizCodeEnum);
     }
-    
+
+    public static Response<String> fail(String message) {
+        return new Response<String>(BizCodeEnum.LOGIN_ERROR);
+    }
+
     public static <T> Response<T> fail(String code, String response) {
-    	return new Response<T>(code, response, null);
+        return new Response<T>(code, response, null);
     }
 }

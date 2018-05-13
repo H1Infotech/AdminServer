@@ -7,11 +7,10 @@ import javax.persistence.Table;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import com.h1infotech.smarthive.common.BasePOJO;
 
 @Entity
 @Table(name = "beeBox")
-public class BeeBox extends BasePOJO {
+public class BeeBox {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

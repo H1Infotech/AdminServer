@@ -1,9 +1,8 @@
 package com.h1infotech.smarthive.web.request;
 
-import com.h1infotech.smarthive.common.BasePOJO;
 import com.h1infotech.smarthive.domain.BeeFarmer;
 
-public class RegisterRequest extends BasePOJO {
+public class RegisterRequest {
     private String name;
     private String mobile;
     private String password;
