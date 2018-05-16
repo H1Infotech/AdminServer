@@ -2,15 +2,23 @@ package com.h1infotech.smarthive.common;
 
 import java.util.Map;
 import java.util.Date;
+import org.slf4j.Logger;
 import java.util.HashMap;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
+import org.slf4j.LoggerFactory;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
+import com.h1infotech.smarthive.domain.BeeFarmer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 
 @Component
 public class JwtTokenUtil {
+	
+	private Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
 	
     private static final String CLAIM_KEY_USERNAME = "a";
     
@@ -21,6 +29,9 @@ public class JwtTokenUtil {
     
     @Value("${jwt.secret}")
     private String secret;
+    
+	@Autowired
+	private BeeFarmerRepository beeFarmerRepository;
 
     public Date getCreatedDateFromToken(String token) {
         try {
@@ -39,6 +50,23 @@ public class JwtTokenUtil {
     public String getUsernameFromToken(String token) {
         final Claims claims = getClaimsFromToken(token);
         return String.valueOf(claims.get(CLAIM_KEY_USERNAME));
+    }
+    
+    public BeeFarmer getBeeFarmerFromToken(String token) {
+    	if(StringUtils.isEmpty(token)) {
+    		return null;
+    	}
+    	final Claims claims = getClaimsFromToken(token);
+    	String userName = String.valueOf(claims.get(CLAIM_KEY_USERNAME));
+    	if(StringUtils.isEmpty(userName)) {
+    		return null;
+    	}
+    	try {
+    		return beeFarmerRepository.findDistinctFirstByName(userName);
+    	}catch(Exception e) {
+    		logger.error("Get Bee Farmer from Database Error", e);
+    		return null;
+    	}
     }
 
     public String generateToken(String username) {

@@ -8,6 +8,7 @@ public enum BizCodeEnum {
 	REGISTER_USER_EXIST_ERROR("000021","User Already Exists"),
 	NO_USER_INFO("000030","No User Information"),
 	DATABASE_ACCESS_ERROR("000040","Database Access Error"),
+	ADD_EMPTY_BEEBOX("000050","Add an Empty BeeBox"),
 	ILLEGAL_INPUT("000090","Illegal Input Parameter(s)"),
 	SERVICE_ERROR("999999","Service Error"),
 	

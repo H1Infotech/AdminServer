@@ -9,4 +9,6 @@ public interface AuthService {
     Object login(String userName, String password) throws AuthenticationException;
 
     String refreshToken(String token);
+    
+    Object updatePassword(String userName, String password, boolean firstTime);
 }

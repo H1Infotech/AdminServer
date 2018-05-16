@@ -13,9 +13,11 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 
 @Component(value = "restLogoutSuccessHandler")
 public class RestLogoutSuccessHandler extends SecurityContextLogoutHandler {
-    @Autowired
+    
+	@Autowired
     private MappingJackson2HttpMessageConverter messageConverter;
-    @Autowired
+    
+	@Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Override

@@ -1,6 +1,9 @@
 package com.h1infotech.smarthive.service;
 
+import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
@@ -43,6 +46,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Object login(String userName, String password) throws AuthenticationException {
+    	
+    	if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password)) {
+    		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    	}
     	UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userName, password);
     	final Authentication authentication = authenticationManager.authenticate(upToken);
     	SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -55,5 +62,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String refreshToken(String token) {
         return null;
+    }
+    
+    @Override
+    @Transactional
+    public String updatePassword(String userName, String password, boolean firstTime) {
+    	try {
+    		beeFarmerRepository.updatePassword(userName, password, firstTime);
+    		return "Update Sucess";
+    	} catch(Exception e) {
+    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR, e);
+    	}
     }
 }

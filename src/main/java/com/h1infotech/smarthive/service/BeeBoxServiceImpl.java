@@ -30,6 +30,45 @@ public class BeeBoxServiceImpl implements BeeBoxService {
 	
     @Override
 	public List<BeeBox> getBeeBox(String token) {
+    	
+    	BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(token);
+    	if(beeFarmer == null|| beeFarmer.getId() == null) {
+    		throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    	}
+        
+        try {	
+        	return beeBoxRepository.findBeeBoxesByFarmerId(beeFarmer.getId());
+    	}catch(Exception e) {
+    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR);
+    	}
+    }
+    
+    public Object addBeeBox(String token, BeeBox beeBox) {
+    	
+    	if(beeBox==null) {
+    		throw new BusinessException(BizCodeEnum.ADD_EMPTY_BEEBOX);
+    	}
+    	BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(token);
+    	if(beeFarmer == null|| beeFarmer.getId() == null) {
+    		throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    	}
+        
+        try {	
+        	return beeBoxRepository.save(beeBox);
+    	}catch(Exception e) {
+    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR);
+    	}
+    }
+    
+    public void deleteBeeBoxByIdIn(List<Long> ids) {
+    	try {
+    		beeBoxRepository.deleteByIdIn(ids);
+    	}catch(Exception e) {
+    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR, e);
+    	}
+    }
+    
+    public void deleteBeeBoxByFarmerIdAndIdIn(String token, List<Long> ids) {
     	if(StringUtils.isEmpty(token)) {
     		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     	}
@@ -50,11 +89,11 @@ public class BeeBoxServiceImpl implements BeeBoxService {
         if(beeFarmer == null || beeFarmer.getId() == null) {
         	throw new BusinessException(BizCodeEnum.NO_USER_INFO);
         }
-        
-        try {	
-        	return beeBoxRepository.findBeeBoxesByFarmerId(beeFarmer.getId());
+    	
+    	try {
+    		beeBoxRepository.deleteBeeBoxByFarmerIdAndIdIn(beeFarmer.getId(), ids);
     	}catch(Exception e) {
-    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR);
+    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR, e);
     	}
     }
 }

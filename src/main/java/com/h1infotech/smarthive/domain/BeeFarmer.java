@@ -31,8 +31,27 @@ public class BeeFarmer implements Serializable, UserDetails {
     private Integer status = 0;
     @Transient
     private String authToken;
+    @Transient
+    private String partnerName;
+    private Boolean firstTimeLogin;
+    
+    public String getPartnerName() {
+		return partnerName;
+	}
 
-    public Long getId() {
+	public void setPartnerName(String partnerName) {
+		this.partnerName = partnerName;
+	}
+
+	public Boolean getFirstTimeLogin() {
+		return firstTimeLogin;
+	}
+    
+	public void setFirstTimeLogin(Boolean firstTimeLogin) {
+		this.firstTimeLogin = firstTimeLogin;
+	}
+	
+	public Long getId() {
         return id;
     }
 
