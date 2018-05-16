@@ -11,10 +11,14 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class JwtTokenUtil {
+	
     private static final String CLAIM_KEY_USERNAME = "a";
+    
     private static final String CLAIM_KEY_CREATED = "b";
+    
     @Value("${jwt.expiration}")
     private Long expiration;
+    
     @Value("${jwt.secret}")
     private String secret;
 

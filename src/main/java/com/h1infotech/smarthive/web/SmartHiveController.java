@@ -1,24 +1,25 @@
 package com.h1infotech.smarthive.web;
 
+import java.util.List;
+import com.h1infotech.smarthive.domain.Partner;
 import com.h1infotech.smarthive.common.Response;
-import com.h1infotech.smarthive.domain.BeeFarmer;
-import com.h1infotech.smarthive.service.AuthService;
-import com.h1infotech.smarthive.service.SmartHiveService;
-import com.h1infotech.smarthive.web.request.LoginRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import com.h1infotech.smarthive.service.BeeBoxService;
+import com.h1infotech.smarthive.service.SmartHiveService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 public class SmartHiveController {
-    @Autowired
+	
+	@Autowired
+	BeeBoxService beeBoxService;
+	
+	@Autowired
     private SmartHiveService smartHiveService;
 
     @GetMapping(path = "/partners")
     @ResponseBody
-    public Response getPartners() {
+    public Response<List<Partner>> getPartners() {
         return Response.success(smartHiveService.getPartners());
     }
-
-
 }

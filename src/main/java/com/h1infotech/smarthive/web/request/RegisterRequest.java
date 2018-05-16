@@ -4,8 +4,8 @@ import com.h1infotech.smarthive.domain.BeeFarmer;
 
 public class RegisterRequest {
     private String name;
-    private String password;
     private String mobile;
+    private String password;
 
     public String getName() {
         return name;
