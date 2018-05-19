@@ -1,22 +1,21 @@
 package com.h1infotech.smarthive.domain;
 
-import com.yunpian.sdk.YunpianClient;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
 import com.yunpian.sdk.model.Result;
+import com.yunpian.sdk.YunpianClient;
 import com.yunpian.sdk.model.SmsSingleSend;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static com.yunpian.sdk.constant.YunpianConstant.*;
 
 public final class SmsSender {
     private static final int VERIFICATION_TEMPLATE_ID = 2298872;
     private final YunpianClient client = new YunpianClient("c26b373454f5dd4400e43304e896b478").init();
 
-    private Result<SmsSingleSend> send(String mobile, int templateId, Map<String, String> params) {
+    @SuppressWarnings("deprecation")
+	private Result<SmsSingleSend> send(String mobile, int templateId, Map<String, String> params) {
         Map<String, String> param = client.newParam(3);
         param.put(MOBILE, mobile);
         param.put(TPL_ID, String.valueOf(templateId));

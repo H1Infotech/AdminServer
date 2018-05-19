@@ -3,6 +3,7 @@ package com.h1infotech.smarthive.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.BeeBox;
@@ -43,6 +44,38 @@ public class BeeBoxServiceImpl implements BeeBoxService {
     	}
     }
     
+    public BeeBox getBeeBoxByTokenAndId(String token, Long id) {
+    	
+    	if(StringUtils.isEmpty(token) || id == null) {
+    		return null;
+    	}
+    	try {
+    		BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(token);
+    		logger.info("====Farmer Id: " + JSONObject.toJSONString(beeFarmer)+"====");
+    		if(beeFarmer != null && beeFarmer.getId()!=null) {
+    			return beeBoxRepository.findBeeBoxByIdAndFarmerId(id, beeFarmer.getId());
+    		}
+    	} catch(Exception e) {
+    		logger.error("===Get Bee Box Information Error(Bee Box ID:{})====",id);	
+    	}
+    	return null;
+    }
+    
+    public BeeBox getBeeBoxByUserNameAndId(String userName, Long id) {
+    	if(StringUtils.isEmpty(userName) || id == null) {
+    		return null;
+    	}
+    	try {
+    		BeeFarmer beeFarmer = beeFarmerRepository.findDistinctFirstByName(userName);
+    		if(beeFarmer != null && beeFarmer.getId()!=null) {
+    			return beeBoxRepository.findBeeBoxByIdAndFarmerId(id, beeFarmer.getId());
+    		}
+    	}catch(Exception e) {
+    		logger.error("====Get Bee Box Information Error(User Name: {}, Bee Box ID:{})====",userName,id);
+    	}
+    	return null;
+    }
+    
     public Object addBeeBox(String token, BeeBox beeBox) {
     	
     	if(beeBox==null) {
@@ -74,7 +107,6 @@ public class BeeBoxServiceImpl implements BeeBoxService {
     	}
     	
     	String userName = jwtTokenUtil.getUsernameFromToken(token);
-    	logger.info("====User Name: " + userName + "====");
     	if(StringUtils.isEmpty(userName)) {
     		throw new BusinessException(BizCodeEnum.NO_USER_INFO);
     	}

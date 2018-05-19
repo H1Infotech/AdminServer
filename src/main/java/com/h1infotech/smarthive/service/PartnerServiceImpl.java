@@ -5,8 +5,6 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.Partner;
-import com.h1infotech.smarthive.common.BizCodeEnum;
-import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.repository.PartnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 

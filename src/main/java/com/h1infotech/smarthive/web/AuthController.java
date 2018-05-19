@@ -4,13 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import javax.servlet.http.HttpServletRequest;
-import com.h1infotech.smarthive.domain.Partner;
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
-import com.h1infotech.smarthive.service.PartnerService;
 import com.h1infotech.smarthive.web.request.LoginRequest;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,10 +27,7 @@ public class AuthController {
 	
     @Autowired
     JwtTokenUtil jwtTokenUtil;
-    
-    @Autowired
-    PartnerService partnerService;
-    
+        
     @Autowired
     private AuthService authService;
     
@@ -90,25 +85,4 @@ public class AuthController {
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
-    
-    @PostMapping(path = "/getBeeFarmerEntity")
-    @ResponseBody
-    public Response<Object> getBeeFarmerEntity(HttpServletRequest httpRequest) {
-    	try {
-    		logger.info("====Catching the Request for Getting Bee Farmer( token: " + httpRequest.getHeader("token") + "====");
-    		BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
-    		if(beeFarmer.getPartnerId()!=null) {
-    			Partner partner = partnerService.getParterById(beeFarmer.getPartnerId());
-    			beeFarmer.setPartnerName(partner.getContactName());
-    		}
-    		return Response.success(beeFarmer);
-    	} catch(BusinessException e) {
-    		logger.error("Update Password Error", e);
-    		return Response.fail(e.getCode(),e.getMessage());
-    	} catch(Exception e) {
-    		logger.error("Update Password Error", e);
-    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
-    	}
-    }
-    
 }

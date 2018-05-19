@@ -1,12 +1,12 @@
 package com.h1infotech.smarthive.web.request;
 
 public class BeeBoxRetrievalRequest {
-	private String token;
+	private Long beeBoxId;
 
-	public String getToken() {
-		return token;
+	public Long getBeeBoxId() {
+		return beeBoxId;
 	}
-	public void setToken(String token) {
-		this.token = token;
+	public void setBeeBoxId(Long beeBoxId) {
+		this.beeBoxId = beeBoxId;
 	}
 }

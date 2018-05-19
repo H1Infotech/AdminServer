@@ -12,13 +12,16 @@ import com.h1infotech.smarthive.service.BeeBoxService;
 import com.h1infotech.smarthive.web.request.LoginRequest;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.web.request.BeeBoxRetrievalRequest;
 
 @RestController
 public class BeeBoxController {
+	
 	private Logger logger = LoggerFactory.getLogger(SmartHiveController.class);
 	
 	@Autowired
@@ -35,6 +38,26 @@ public class BeeBoxController {
     		List<BeeBox> beeBoxes = beeBoxService.getBeeBox(request.getHeader("token"));
     		logger.info("====Response: "+JSONArray.toJSONString(beeBoxes)+"====");
     		return Response.success(beeBoxes);
+    	}catch(BusinessException e) {
+    		logger.error(e.getMessage(), e);
+    		return Response.fail(e.getCode(), e.getMessage());
+    	}catch(Exception e) {
+    		logger.error("Get BeeBox Info Error",e);
+    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    	}
+    }
+    
+    @PostMapping(path = "/getBeeBox")
+    @ResponseBody
+    public Response<BeeBox> getBeeBoxes(HttpServletRequest request, @RequestBody BeeBoxRetrievalRequest beeBoxRequest) {
+    	try {
+    		if(request == null || beeBoxRequest==null || beeBoxRequest.getBeeBoxId()==null) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
+    		logger.info("====Catching the Request for beeBox Id: " + beeBoxRequest.getBeeBoxId() +",token: "+request.getHeader("token")+"====");
+    		BeeBox beeBox = beeBoxService.getBeeBoxByTokenAndId(request.getHeader("token"), beeBoxRequest.getBeeBoxId());
+    		logger.info("====Response: "+JSONArray.toJSONString(beeBox)+"====");
+    		return Response.success(beeBox);
     	}catch(BusinessException e) {
     		logger.error(e.getMessage(), e);
     		return Response.fail(e.getCode(), e.getMessage());
