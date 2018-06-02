@@ -10,7 +10,7 @@ import javax.persistence.GenerationType;
 
 @Entity
 @Table(name = "sensorData")
-public class SensorData {
+public class SensorData implements Comparable<SensorData> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -19,12 +19,19 @@ public class SensorData {
 	private BigDecimal lat;
 	private BigDecimal lng;
 	private Date createDate;
-	private BigDecimal gravity;
-	private BigDecimal battery;	
-	private BigDecimal humidity;
-	private BigDecimal temperature;
-	private BigDecimal airPressure;
+	private Double gravity;
+	private Double battery;	
+	private Double humidity;
+	private Double temperature;
+	private Double airPressure;
+	private Integer status;
 	
+	public Integer getStatus() {
+		return status;
+	}
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -49,34 +56,34 @@ public class SensorData {
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
-	public BigDecimal getTemperature() {
+	public Double getTemperature() {
 		return temperature;
 	}
-	public void setTemperature(BigDecimal temperature) {
+	public void setTemperature(Double temperature) {
 		this.temperature = temperature;
 	}
-	public BigDecimal getHumidity() {
+	public Double getHumidity() {
 		return humidity;
 	}
-	public void setHumidity(BigDecimal humidity) {
+	public void setHumidity(Double humidity) {
 		this.humidity = humidity;
 	}
-	public BigDecimal getAirPressure() {
+	public Double getAirPressure() {
 		return airPressure;
 	}
-	public void setAirPressure(BigDecimal airPressure) {
+	public void setAirPressure(Double airPressure) {
 		this.airPressure = airPressure;
 	}
-	public BigDecimal getGravity() {
+	public Double getGravity() {
 		return gravity;
 	}
-	public void setGravity(BigDecimal gravity) {
+	public void setGravity(Double gravity) {
 		this.gravity = gravity;
 	}
-	public BigDecimal getBattery() {
+	public Double getBattery() {
 		return battery;
 	}
-	public void setBattery(BigDecimal battery) {
+	public void setBattery(Double battery) {
 		this.battery = battery;
 	}
 	public BigDecimal getLat() {
@@ -90,5 +97,23 @@ public class SensorData {
 	}
 	public void setLng(BigDecimal lng) {
 		this.lng = lng;
+	}
+
+	@Override
+	public int compareTo(SensorData o) {
+		if(o==null || o.getBoxId()==null) {
+			return 1;
+		}
+		if(this.boxId==null) {
+			return -1;
+		}
+		long diff = this.boxId - o.getBoxId();
+		if(diff==0) {
+			return 0;
+		}else if(diff>0) {
+			return 1;
+		}else {
+			return -1;
+		}
 	}
 }

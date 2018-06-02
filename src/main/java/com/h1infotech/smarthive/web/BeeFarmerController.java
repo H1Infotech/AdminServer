@@ -3,12 +3,12 @@ package com.h1infotech.smarthive.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
-import com.h1infotech.smarthive.domain.Partner;
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.BeeFarmer;
+import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
-import com.h1infotech.smarthive.service.PartnerService;
+import com.h1infotech.smarthive.service.OrganizationService;
 import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +25,7 @@ public class BeeFarmerController {
     JwtTokenUtil jwtTokenUtil;
 	
 	@Autowired
-	PartnerService partnerService;
+	OrganizationService partnerService;
 	
     @Autowired
 	BeeFarmerService beeFarmerService;
@@ -36,9 +36,9 @@ public class BeeFarmerController {
     	try {
     		logger.info("====Catching the Request for Getting Bee Farmer( token: " + httpRequest.getHeader("token") + "====");
     		BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
-    		if(beeFarmer.getPartnerId()!=null) {
-    			Partner partner = partnerService.getParterById(beeFarmer.getPartnerId());
-    			beeFarmer.setPartnerName(partner.getContactName());
+    		if(beeFarmer.getOrganizationId()!=null) {
+    			Organization partner = partnerService.getOrganizationById(beeFarmer.getOrganizationId());
+    			beeFarmer.setOrganizationName(partner.getContactName());
     		}
     		return Response.success(beeFarmer);
     	} catch(BusinessException e) {

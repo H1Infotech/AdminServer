@@ -4,21 +4,22 @@ import org.slf4j.Logger;
 import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import com.h1infotech.smarthive.domain.Partner;
-import com.h1infotech.smarthive.repository.PartnerRepository;
+
+import com.h1infotech.smarthive.domain.Organization;
+import com.h1infotech.smarthive.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service(value = "partnerService")
-public class PartnerServiceImpl implements PartnerService {
+public class OrganizationServiceImpl implements OrganizationService {
 
-	Logger logger = LoggerFactory.getLogger(PartnerServiceImpl.class);
+	Logger logger = LoggerFactory.getLogger(OrganizationServiceImpl.class);
 	
 	@Autowired
-	PartnerRepository PartnerRepository;
+	OrganizationRepository PartnerRepository;
 	
 	@Override
-	public Partner getParterById(Long id) {
-		Optional<Partner> partner = null;
+	public Organization getOrganizationById(Long id) {
+		Optional<Organization> partner = null;
 		try {
 			partner = PartnerRepository.findById(id);
 		} catch(Exception e) {

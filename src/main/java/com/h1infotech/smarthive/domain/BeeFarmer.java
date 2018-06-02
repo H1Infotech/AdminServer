@@ -23,24 +23,29 @@ public class BeeFarmer implements Serializable, UserDetails {
     private String mobile;
     private String email;
     private String address;
+    private String username;
     @JsonIgnore
     private String password;
-    private Long partnerId;
+    private Long organizationId;
     private Date createDate = new Date();
     private Date updateDate;
     private Integer status = 0;
     @Transient
     private String authToken;
-    @Transient
-    private String partnerName;
     private Boolean firstTimeLogin;
-    
-    public String getPartnerName() {
-		return partnerName;
+    @Transient
+    private String organizationName;
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public void setPartnerName(String partnerName) {
-		this.partnerName = partnerName;
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
 	}
 
 	public Boolean getFirstTimeLogin() {
@@ -104,7 +109,7 @@ public class BeeFarmer implements Serializable, UserDetails {
 
     @Override
     public String getUsername() {
-        return getName();
+        return this.username;
     }
 
     @Override
@@ -139,12 +144,12 @@ public class BeeFarmer implements Serializable, UserDetails {
         this.password = password;
     }
 
-    public Long getPartnerId() {
-        return partnerId;
+    public Long getOrganizationId() {
+        return organizationId;
     }
 
-    public void setPartnerId(Long partnerId) {
-        this.partnerId = partnerId;
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Integer getStatus() {

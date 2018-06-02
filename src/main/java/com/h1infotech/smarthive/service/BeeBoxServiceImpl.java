@@ -30,6 +30,15 @@ public class BeeBoxServiceImpl implements BeeBoxService {
 	private BeeFarmerRepository beeFarmerRepository;
 	
     @Override
+	public List<BeeBox> getBeeFamerBeeBoxes(long farmerId) {     
+        try {	
+        	return beeBoxRepository.findBeeBoxesByFarmerId(farmerId);
+    	}catch(Exception e) {
+    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR);
+    	}
+    }
+	
+    @Override
 	public List<BeeBox> getBeeBox(String token) {
     	
     	BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(token);

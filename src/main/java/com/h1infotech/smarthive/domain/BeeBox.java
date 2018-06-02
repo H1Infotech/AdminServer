@@ -3,6 +3,7 @@ package com.h1infotech.smarthive.domain;
 import java.util.Date;
 import javax.persistence.Id;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import javax.persistence.Table;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,8 +22,29 @@ public class BeeBox {
 	private BigDecimal lng;
 	private Date entryDate;
 	private String manufacturer;
-	private String productionDate;
+	private Date productionDate;
+	private Long latestSensorDataId;
+	private Boolean protectionStrategy;
+	private Date updateSensorDataTime;
 	
+	public Date getUpdateSensorDataTime() {
+		return updateSensorDataTime;
+	}
+	public void setUpdateSensorDataTime(Date updateSensorDataTime) {
+		this.updateSensorDataTime = updateSensorDataTime;
+	}
+	public Boolean getProtectionStrategy() {
+		return protectionStrategy;
+	}
+	public void setProtectionStrategy(Boolean protectionStrategy) {
+		this.protectionStrategy = protectionStrategy;
+	}
+	public Long getLatestSensorDataId() {
+		return latestSensorDataId;
+	}
+	public void setLatestSensorDataId(Long latestSensorDataId) {
+		this.latestSensorDataId = latestSensorDataId;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -41,10 +63,10 @@ public class BeeBox {
 	public void setManufacturer(String manufacturer) {
 		this.manufacturer = manufacturer;
 	}
-	public String getProductionDate() {
+	public Date getProductionDate() {
 		return productionDate;
 	}
-	public void setProductionDate(String productionDate) {
+	public void setProductionDate(Date productionDate) {
 		this.productionDate = productionDate;
 	}
 	public String getBatchNo() {
@@ -76,5 +98,10 @@ public class BeeBox {
 	}
 	public void setEntryDate(Date entryDate) {
 		this.entryDate = entryDate;
+	} 
+	@Override
+	public String toString() {
+		DateFormat mediumDateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM); 
+		return id+"_"+farmerId+"_"+batchNo+"_"+lat+"_"+lng+"_"+mediumDateFormat.format(entryDate)+"_"+manufacturer+"_"+mediumDateFormat.format(productionDate);
 	}
 }
