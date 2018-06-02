@@ -33,4 +33,10 @@ public class BusinessException extends RuntimeException {
         this.code = bizCodeEnum.getCode();
         this.message = bizCodeEnum.getMessage();
     }
+    
+    public BusinessException(String code, String messgae, Throwable cause) {
+    	 super("Code: " + code + ", Message: " + messgae, cause);
+         this.code = code;
+         this.message = messgae;
+    }
 }

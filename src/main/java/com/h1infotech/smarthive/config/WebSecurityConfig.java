@@ -76,8 +76,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true).clearAuthentication(true).and()
                 .formLogin().disable()
                 .authorizeRequests().antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers(HttpMethod.POST).permitAll().antMatchers("/login**").permitAll()
+                .antMatchers(HttpMethod.POST).permitAll().antMatchers("/adminLogin**").permitAll()
                 .antMatchers(HttpMethod.POST).permitAll().antMatchers("/register**").permitAll()
+                .antMatchers(HttpMethod.POST).permitAll().antMatchers("/adminUpdatePassword**").permitAll()
+                .antMatchers(HttpMethod.POST).permitAll().antMatchers("/adminSMSService**").permitAll()
                 .anyRequest().authenticated();
         //  httpSecurity.headers().cacheControl();
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

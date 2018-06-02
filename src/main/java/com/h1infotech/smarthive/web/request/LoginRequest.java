@@ -1,8 +1,6 @@
 package com.h1infotech.smarthive.web.request;
 
 public class LoginRequest {
-    private String mobile;
-    private String certCode;
     private String password;
     private String userName;
 
@@ -20,21 +18,5 @@ public class LoginRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
-    }
-
-    public String getCertCode() {
-        return certCode;
-    }
-
-    public void setCertCode(String certCode) {
-        this.certCode = certCode;
     }
 }

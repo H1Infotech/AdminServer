@@ -1,25 +1,25 @@
 package com.h1infotech.smarthive.service;
 
 import org.apache.commons.lang3.StringUtils;
+import com.h1infotech.smarthive.domain.Admin;
 import org.springframework.stereotype.Service;
-import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.BusinessException;
+import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 
 @Service
-public class BeeFarmerServiceImpl implements BeeFarmerService {
+public class AdminServiceImpl implements AdminService {
 	
 	@Autowired
-	BeeFarmerRepository beeFarmerRepository;
+	AdminRepository adminRepository;
 	
-	public BeeFarmer getBeeFarmerByUserName(String userName) {
+	public Admin getAdminByUserName(String userName) {
 		if(StringUtils.isEmpty(userName)) {
 			return null;
 		}
 		try {
-			return beeFarmerRepository.findDistinctFirstByName(userName);
+			return adminRepository.findDistinctFirstByUsername(userName);
 		} catch(Exception e) {
 			throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR, e);
 		}

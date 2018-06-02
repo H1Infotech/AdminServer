@@ -2,19 +2,33 @@ package com.h1infotech.smarthive.web.request;
 
 public class PasswordUpteRequest {
 	
+	private String mobile;
+	private String smsCode;  
+	private String username;
 	private String password;
-	private String firstTime;  //"1" means the first to change the password
 	
+	public String getMobile() {
+		return mobile;
+	}
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
 	public String getPassword() {
 		return password;
 	}
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public String getFirstTime() {
-		return firstTime;
+	public String getSmsCode() {
+		return smsCode;
 	}
-	public void setFirstTime(String firstTime) {
-		this.firstTime = firstTime;
+	public void setSmsCode(String smsCode) {
+		this.smsCode = smsCode;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

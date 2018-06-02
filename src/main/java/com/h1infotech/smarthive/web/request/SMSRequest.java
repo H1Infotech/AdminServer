@@ -2,9 +2,16 @@ package com.h1infotech.smarthive.web.request;
 
 public class SMSRequest {
 	
+	private String userName;
 	private String messageType;
 	private String mobile;
 	
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 	public String getMessageType() {
 		return messageType;
 	}

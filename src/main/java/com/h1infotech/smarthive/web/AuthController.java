@@ -3,9 +3,9 @@ package com.h1infotech.smarthive.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.common.Response;
-import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
@@ -14,11 +14,9 @@ import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.h1infotech.smarthive.web.request.RegisterRequest;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.h1infotech.smarthive.web.request.PasswordUpteRequest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @RestController
 public class AuthController {
@@ -30,15 +28,17 @@ public class AuthController {
         
     @Autowired
     private AuthService authService;
-    
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @PostMapping(path = "/login")
+    @PostMapping(path = "/adminLogin")
     @ResponseBody
     public Response<Object> login(@RequestBody LoginRequest loginRequest) {
         try {
         	logger.info("====Catching the Request for Login: " + JSONObject.toJSONString(loginRequest) + "====");
+        	if(loginRequest==null 
+        			|| StringUtils.isEmpty(loginRequest.getUserName())
+        			|| StringUtils.isEmpty(loginRequest.getPassword())) {
+        		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+        	}
         	Object response = authService.login(loginRequest.getUserName(), loginRequest.getPassword());
         	logger.info("====Login Response: " + JSONObject.toJSONString(response) + "====");
             return Response.success(response);
@@ -50,33 +50,19 @@ public class AuthController {
         	return Response.fail(BizCodeEnum.LOGIN_ERROR);
         }
     }
-
-    @PostMapping(path = "/register")
-    @ResponseBody
-    public Response<Object> register(@RequestBody RegisterRequest registerRequest) {
-        try {
-        	logger.info("====Catching the Request for Register: " + JSONObject.toJSONString(registerRequest) + "====");
-            BeeFarmer beeFarmer = authService.register(registerRequest.getBeeFarmer());
-            logger.info("====Register Response: " + JSONObject.toJSONString(beeFarmer) + "====");
-            return Response.success(beeFarmer);
-        } catch (BusinessException e) {
-        	logger.error(e.getMessage(), e);
-            return Response.fail(e.getCode(), e.getMessage());
-        } catch(Exception e) {
-        	logger.error("Register Error", e);
-        	return Response.fail(BizCodeEnum.REGISTER_ERROR);
-        }
-    }
     
-    @PostMapping(path = "/updatePassword")
+    @PostMapping(path = "/adminUpdatePassword")
     @ResponseBody
     public Response<Object> updatePassword(HttpServletRequest httpRequest, @RequestBody PasswordUpteRequest request) {
     	try {
-    		logger.info("====Catching the Request for Updating Password( token: " + httpRequest.getHeader("token")+", "+JSONObject.toJSONString(request) + "====");
-    		String userName = jwtTokenUtil.getUsernameFromToken(httpRequest.getHeader("token"));
-    		String password = bCryptPasswordEncoder.encode(request.getPassword());
-    		boolean firstTime = false;
-    		return Response.success(authService.updatePassword(userName, password, firstTime));
+    		logger.info("====Catching the Request for Updating Password: {}====", JSONObject.toJSONString(request));
+    		if(request==null || StringUtils.isEmpty(request.getSmsCode()) 
+        			|| StringUtils.isEmpty(request.getPassword())
+        			|| StringUtils.isEmpty(request.getMobile())
+        			|| StringUtils.isEmpty(request.getUsername())) {
+        		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+        	}
+    		return Response.success(authService.updatePassword(request.getUsername(), request.getPassword(), request.getMobile(), request.getSmsCode()));
     	} catch(BusinessException e) {
     		logger.error("Update Password Error", e);
     		return Response.fail(e.getCode(),e.getMessage());

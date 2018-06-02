@@ -9,7 +9,7 @@ import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.service.OrganizationService;
-import com.h1infotech.smarthive.service.BeeFarmerService;
+import com.h1infotech.smarthive.service.AdminService;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,7 +28,7 @@ public class BeeFarmerController {
 	OrganizationService partnerService;
 	
     @Autowired
-	BeeFarmerService beeFarmerService;
+	AdminService beeFarmerService;
 	
 	@GetMapping(path = "/getUserDisplayInfo")
     @ResponseBody

@@ -1,17 +1,16 @@
 package com.h1infotech.smarthive.service;
 
-import org.springframework.util.StringUtils;
+import com.h1infotech.smarthive.domain.Admin;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.h1infotech.smarthive.domain.BeeFarmer;
+import com.h1infotech.smarthive.domain.SmsSender;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import org.springframework.security.core.Authentication;
 import com.h1infotech.smarthive.common.BusinessException;
+import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private StringRedisTemplate stringRedisTemplate;
     
     @Autowired
-    private BeeFarmerRepository beeFarmerRepository;
+    private AdminRepository adminRepository;
     
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -37,24 +36,20 @@ public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
     
     @Override
-    public BeeFarmer register(BeeFarmer farmer) {
-    	BeeFarmer registeredFarmer = beeFarmerRepository.findDistinctFirstByName(farmer.getName());
-    	if (registeredFarmer != null) throw new BusinessException(BizCodeEnum.REGISTER_ERROR);
-    	farmer.setPassword(bCryptPasswordEncoder.encode(farmer.getPassword()));
-    	return beeFarmerRepository.save(farmer);
+    public Admin register(Admin admin) {
+    	Admin registeredAdmin = adminRepository.findDistinctFirstByUsername(admin.getName());
+    	if (registeredAdmin != null) throw new BusinessException(BizCodeEnum.REGISTER_ERROR);
+    	admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
+    	return adminRepository.save(admin);
     }
 
     @Override
     public Object login(String userName, String password) throws AuthenticationException {
-    	
-    	if(StringUtils.isEmpty(userName) || StringUtils.isEmpty(password)) {
-    		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
-    	}
     	UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(userName, password);
     	final Authentication authentication = authenticationManager.authenticate(upToken);
     	SecurityContextHolder.getContext().setAuthentication(authentication);
     	final String token = jwtTokenUtil.generateToken(userName);
-    	((BeeFarmer) authentication.getPrincipal()).setAuthToken(token);
+    	((Admin) authentication.getPrincipal()).setAuthToken(token);
     	stringRedisTemplate.opsForValue().set(token, "true");
     	return authentication.getPrincipal();
     }
@@ -66,12 +61,25 @@ public class AuthServiceImpl implements AuthService {
     
     @Override
     @Transactional
-    public String updatePassword(String userName, String password, boolean firstTime) {
+    public String updatePassword(String username, String password, String mobile, String smsCode) {
     	try {
-    		beeFarmerRepository.updatePassword(userName, password, firstTime);
+    		Admin admin = adminRepository.findDistinctFirstByUsername(username);
+        	if(admin == null) {
+        		throw new BusinessException(BizCodeEnum.USER_NAME_INEXISTENCE);
+        	}
+        	if(!mobile.equals(admin.getMobile())) {
+        		throw new BusinessException(BizCodeEnum.MOBILE_NUM_INCONSISTENT);
+        	}
+        	String code = stringRedisTemplate.opsForValue().get(SmsSender.VERIFICATION_CODE_KEY_PREFIX+mobile);
+        	if(!smsCode.equals(code)) {
+        		throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
+        	}
+    		adminRepository.updatePassword(username, bCryptPasswordEncoder.encode(password));
     		return "Update Sucess";
+    	} catch(BusinessException e) {
+    		throw new BusinessException(e.getCode(), e.getMessage(), e);
     	} catch(Exception e) {
-    		throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR, e);
+    		throw new BusinessException(BizCodeEnum.SERVICE_ERROR, e);
     	}
     }
 }
