@@ -3,7 +3,7 @@ package com.h1infotech.smarthive.web.response;
 import java.util.List;
 import com.h1infotech.smarthive.domain.Organization;
 
-public class PageOrganizationRetrievalResponse {
+public class OrganizationPageRetrievalResponse {
 	private Integer currentPageNo;
 	private Integer totalPageNo;
 	private List<Organization> organizations;

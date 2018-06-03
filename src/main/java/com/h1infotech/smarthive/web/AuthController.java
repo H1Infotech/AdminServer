@@ -40,6 +40,7 @@ public class AuthController {
         		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
         	}
         	Object response = authService.login(loginRequest.getUserName(), loginRequest.getPassword());
+
         	logger.info("====Login Response: " + JSONObject.toJSONString(response) + "====");
             return Response.success(response);
         } catch (BusinessException e) {

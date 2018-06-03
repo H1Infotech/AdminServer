@@ -1,6 +1,6 @@
 package com.h1infotech.smarthive.web.request;
 
-public class OrganizationRetrievalRequest {
+public class OrganizationPageRetrievalRequest {
 	private Integer pageSize;
 	private Integer pageNo;
 	

@@ -1,6 +1,7 @@
 package com.h1infotech.smarthive.domain;
 
 import java.util.Date;
+import java.util.List;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Id;
@@ -40,6 +41,25 @@ public class Admin implements Serializable, UserDetails {
 	private String authToken;
     @Transient
     private String organizationName;
+    @Transient
+    private List<Integer> rights;
+    
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	public List<Integer> getRights() {
+		return rights;
+	}
+
+	public void setRights(List<Integer> rights) {
+		this.rights = rights;
+	}
+
 	public Long getId() {
 		return id;
 	}

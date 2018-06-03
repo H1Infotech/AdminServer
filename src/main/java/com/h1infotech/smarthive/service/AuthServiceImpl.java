@@ -30,6 +30,9 @@ public class AuthServiceImpl implements AuthService {
     private AdminRepository adminRepository;
     
     @Autowired
+    AdminRightService adminRightService;
+    
+    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
@@ -50,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
     	SecurityContextHolder.getContext().setAuthentication(authentication);
     	final String token = jwtTokenUtil.generateToken(userName);
     	((Admin) authentication.getPrincipal()).setAuthToken(token);
+    	((Admin) authentication.getPrincipal()).setRights(adminRightService.getAdminRights(((Admin) authentication.getPrincipal()).getId()));
     	stringRedisTemplate.opsForValue().set(token, "true");
     	return authentication.getPrincipal();
     }

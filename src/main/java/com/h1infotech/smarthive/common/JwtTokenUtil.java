@@ -13,6 +13,8 @@ import com.h1infotech.smarthive.domain.Admin;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import com.h1infotech.smarthive.repository.AdminRepository;
+import com.h1infotech.smarthive.service.AdminRightService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
@@ -32,6 +34,8 @@ public class JwtTokenUtil {
     
 	@Autowired
 	private AdminRepository adminRepository;
+	@Autowired
+	AdminRightService adminRightService;
 
     public Date getCreatedDateFromToken(String token) {
         try {
@@ -62,7 +66,11 @@ public class JwtTokenUtil {
     		return null;
     	}
     	try {
-    		return adminRepository.findDistinctFirstByUsername(userName);
+    		Admin admin = adminRepository.findDistinctFirstByUsername(userName);
+    		if(admin!=null && admin.getId()!=null) {
+    			admin.setRights(adminRightService.getAdminRights(admin.getId()));
+    		}
+    		return admin;
     	}catch(Exception e) {
     		logger.error("Get Bee Farmer from Database Error", e);
     		return null;

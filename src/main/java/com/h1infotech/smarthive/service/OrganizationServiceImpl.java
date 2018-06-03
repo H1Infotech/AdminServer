@@ -9,14 +9,17 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
+
+import com.alibaba.fastjson.JSONArray;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.h1infotech.smarthive.repository.OrganizationRepository;
-import com.h1infotech.smarthive.web.response.PageOrganizationRetrievalResponse;
+import com.h1infotech.smarthive.web.response.OrganizationPageRetrievalResponse;
 
 @Service(value = "partnerService")
 public class OrganizationServiceImpl implements OrganizationService {
@@ -28,23 +31,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public Organization getOrganizationById(Long id) {
-		Optional<Organization> partner = null;
+		Optional<Organization> organization = null;
 		try {
-			partner = organizationRepository.findById(id);
+			organization = organizationRepository.findById(id);
 		} catch(Exception e) {
 			return null;
 		}
-		return partner.isPresent()?partner.get():null;
+		return organization.isPresent()?organization.get():null;
 	}
 	
 	@Override
-	public PageOrganizationRetrievalResponse getOrganization(int pageNo, int pageSize) {
+	public Organization getOrganizationByAdminIdAndId(Long adminId, Long id) {
+		return organizationRepository.findByIdAndAdminId(id,adminId);
+	}
+	
+	@Override
+	public OrganizationPageRetrievalResponse getOrganization(int pageNo, int pageSize) {
 		if(pageNo < 1 || pageSize < 0) {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
 		Pageable page = PageRequest.of(pageNo-1, pageSize);
 		Page<Organization> organizations = organizationRepository.findAll(page);
-		PageOrganizationRetrievalResponse response = new PageOrganizationRetrievalResponse();
+		OrganizationPageRetrievalResponse response = new OrganizationPageRetrievalResponse();
 		if(organizations.hasContent()) {
 			response.setCurrentPageNo(pageNo);
 			response.setTotalPageNo(organizations.getTotalPages());
@@ -57,13 +65,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public PageOrganizationRetrievalResponse getOrganization(long adminId, int pageNo, int pageSize) {
+	public OrganizationPageRetrievalResponse getOrganization(long adminId, int pageNo, int pageSize) {
 		if(pageNo < 1 || pageSize < 0) {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
 		Pageable page = PageRequest.of(pageNo-1, pageSize);
 		Page<Organization> organizations = organizationRepository.findByAdminId(adminId, page);
-		PageOrganizationRetrievalResponse response = new PageOrganizationRetrievalResponse();
+		OrganizationPageRetrievalResponse response = new OrganizationPageRetrievalResponse();
 		if(organizations.hasContent()) {
 			response.setCurrentPageNo(pageNo);
 			response.setTotalPageNo(organizations.getTotalPages());
@@ -99,4 +107,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return list;
 	}
 
+	@Override
+	@Transactional
+	public void deleteOrganization(List<Long> ids) {
+		int deleteNum = organizationRepository.deleteByIdIn(ids);
+		if(deleteNum != ids.size()) {
+			throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR);
+		}
+	}
+	
+	@Override
+	@Transactional
+	public void deleteOrganization(long adminId, List<Long> ids) {
+		int deleteNum = organizationRepository.deleteByAdminIdIsAndIdIn(adminId, ids);
+		if(deleteNum != ids.size()) {
+			throw new BusinessException(BizCodeEnum.DATABASE_ACCESS_ERROR);
+		}
+	}
+	
+	@Override
+	@Transactional
+	public void alterOrganization(Organization organization) {
+		organizationRepository.save(organization);
+	}
 }
