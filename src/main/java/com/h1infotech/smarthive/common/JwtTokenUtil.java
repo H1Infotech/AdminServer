@@ -9,11 +9,11 @@ import io.jsonwebtoken.Claims;
 import org.slf4j.LoggerFactory;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.util.StringUtils;
+import com.h1infotech.smarthive.domain.Admin;
 import org.springframework.stereotype.Component;
-import com.h1infotech.smarthive.domain.BeeFarmer;
 import org.springframework.beans.factory.annotation.Value;
+import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 
 @Component
 public class JwtTokenUtil {
@@ -31,7 +31,7 @@ public class JwtTokenUtil {
     private String secret;
     
 	@Autowired
-	private BeeFarmerRepository beeFarmerRepository;
+	private AdminRepository adminRepository;
 
     public Date getCreatedDateFromToken(String token) {
         try {
@@ -52,7 +52,7 @@ public class JwtTokenUtil {
         return String.valueOf(claims.get(CLAIM_KEY_USERNAME));
     }
     
-    public BeeFarmer getBeeFarmerFromToken(String token) {
+    public Admin getBeeFarmerFromToken(String token) {
     	if(StringUtils.isEmpty(token)) {
     		return null;
     	}
@@ -62,7 +62,7 @@ public class JwtTokenUtil {
     		return null;
     	}
     	try {
-    		return beeFarmerRepository.findDistinctFirstByName(userName);
+    		return adminRepository.findDistinctFirstByUsername(userName);
     	}catch(Exception e) {
     		logger.error("Get Bee Farmer from Database Error", e);
     		return null;

@@ -10,6 +10,7 @@ public class Organization {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    
     private String email;
+    private Long adminId;
     private Integer status;
     private String address;
     private Date createDate;
@@ -18,8 +19,14 @@ public class Organization {
     private String contactName;
     private String contactPhone;
     private String organizationName;
-
-    public String getEmail() {
+    
+    public Long getAdminId() {
+		return adminId;
+	}
+	public void setAdminId(Long adminId) {
+		this.adminId = adminId;
+	}
+	public String getEmail() {
 		return email;
 	}
 	public void setEmail(String email) {

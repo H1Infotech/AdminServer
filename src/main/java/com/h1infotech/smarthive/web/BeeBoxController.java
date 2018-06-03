@@ -22,7 +22,7 @@ import com.h1infotech.smarthive.web.request.BeeBoxRetrievalRequest;
 @RestController
 public class BeeBoxController {
 	
-	private Logger logger = LoggerFactory.getLogger(SmartHiveController.class);
+	private Logger logger = LoggerFactory.getLogger(BeeBoxController.class);
 	
 	@Autowired
 	BeeBoxService beeBoxService;
