@@ -1,4 +1,4 @@
-package com.h1infotech.smarthive.web;
+package com.h1infotech.smarthive.web.request;
 
 import java.util.Date;
 
@@ -112,7 +112,7 @@ public class OrganizationAddUpdateRequest {
 		organization.setMemberNum(memberNum);
 		organization.setContactName(contactName);
 		organization.setContactPhone(contactPhone);
-		organization.setCreateDate(createDate);
+		organization.setCreateDate(new Date());
 		organization.setUpdateDate(new Date());
 		organization.setStatus(status);
 		organization.setAddress(address);

@@ -1,23 +1,20 @@
 package com.h1infotech.smarthive.service;
 
-import org.slf4j.Logger;
-
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
-
-import com.alibaba.fastjson.JSONArray;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import com.h1infotech.smarthive.repository.OrganizationRepository;
 import com.h1infotech.smarthive.web.response.OrganizationPageRetrievalResponse;
 
@@ -129,5 +126,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Transactional
 	public void alterOrganization(Organization organization) {
 		organizationRepository.save(organization);
+	}
+	
+	@Override
+	public List<Long> getIdsByAdminId(long adminId) {
+		List<Organization> organizations = organizationRepository.findByAdminId(adminId);
+		if(organizations==null || organizations.size()==0) {
+			return null;
+		}
+		List<Long> ids = new LinkedList<Long>();
+		for(Organization organization: organizations) {
+			ids.add(organization.getId());
+		}
+		return ids;
 	}
 }

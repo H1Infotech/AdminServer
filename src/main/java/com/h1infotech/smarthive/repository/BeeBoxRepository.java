@@ -8,5 +8,6 @@ public interface BeeBoxRepository extends JpaRepository<BeeBox, Long> {
 	List<BeeBox> findBeeBoxesByFarmerId(Long farmerId);
 	BeeBox findBeeBoxByIdAndFarmerId(Long id, Long farmerId);
 	void deleteByIdIn(List<Long> ids);
+	void deleteByFarmerIdIn(List<Long> farmerIds);
 	void deleteBeeBoxByFarmerIdAndIdIn(Long farmerId, List<Long> ids);
 }

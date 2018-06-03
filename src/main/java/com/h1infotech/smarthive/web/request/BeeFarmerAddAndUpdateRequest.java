@@ -1,15 +1,10 @@
-package com.h1infotech.smarthive.domain;
+package com.h1infotech.smarthive.web.request;
 
 import java.util.Date;
-import javax.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Entity
-@Table(name = "beeFarmer")
-public class BeeFarmer {
+import com.h1infotech.smarthive.domain.BeeFarmer;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+public class BeeFarmerAddAndUpdateRequest {
 	private Long id;
 	private String name;
 	private String username;
@@ -17,33 +12,12 @@ public class BeeFarmer {
 	private Date createDate;
 	private Date updateDate;
 	private String mobile;
-	@JsonIgnore
 	private String password;
 	private Long organizationId;
 	private String email;
 	private Integer status;
 	private Boolean firstTimeLogin;
 	private Integer beeBoxNum;
-	@Transient
-	private String OrganizationName;
-
-	
-	
-	public Integer getBeeBoxNum() {
-		return beeBoxNum;
-	}
-
-	public void setBeeBoxNum(Integer beeBoxNum) {
-		this.beeBoxNum = beeBoxNum;
-	}
-
-	public String getOrganizationName() {
-		return OrganizationName;
-	}
-
-	public void setOrganizationName(String organizationName) {
-		OrganizationName = organizationName;
-	}
 
 	public Long getId() {
 		return id;
@@ -140,4 +114,48 @@ public class BeeFarmer {
 	public void setFirstTimeLogin(Boolean firstTimeLogin) {
 		this.firstTimeLogin = firstTimeLogin;
 	}
+
+	public Integer getBeeBoxNum() {
+		return beeBoxNum;
+	}
+
+	public void setBeeBoxNum(Integer beeBoxNum) {
+		this.beeBoxNum = beeBoxNum;
+	}
+	
+	public BeeFarmer getBeeFarmerAdd() {
+		BeeFarmer beeFarmer = new BeeFarmer();
+		beeFarmer.setName(name);
+		//beeFarmer.set username;
+		beeFarmer.setAddress(address); 
+		beeFarmer.setCreateDate(new Date());
+		beeFarmer.setUpdateDate(new Date());
+		beeFarmer.setMobile(mobile);
+		beeFarmer.setPassword(password);
+		beeFarmer.setOrganizationId(organizationId); 
+		beeFarmer.setEmail(email);
+		beeFarmer.setStatus(status); 
+		beeFarmer.setFirstTimeLogin(firstTimeLogin); 
+		beeFarmer.setBeeBoxNum(beeBoxNum);
+		return beeFarmer;
+	}
+	
+	public BeeFarmer getBeeFarmerUpdate() {
+		BeeFarmer beeFarmer = new BeeFarmer();
+		beeFarmer.setId(id);
+		beeFarmer.setName(name);
+		beeFarmer.setUsername(username);
+		beeFarmer.setAddress(address); 
+		beeFarmer.setCreateDate(createDate);
+		beeFarmer.setUpdateDate(new Date());
+		beeFarmer.setMobile(mobile);
+		beeFarmer.setPassword(password);
+		beeFarmer.setOrganizationId(organizationId); 
+		beeFarmer.setEmail(email);
+		beeFarmer.setStatus(status); 
+		beeFarmer.setFirstTimeLogin(firstTimeLogin); 
+		beeFarmer.setBeeBoxNum(beeBoxNum);
+		return beeFarmer;
+	}
+
 }

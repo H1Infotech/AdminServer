@@ -14,4 +14,5 @@ public interface OrganizationService {
 	void deleteOrganization(List<Long> ids);
 	void deleteOrganization(long adminId,List<Long> ids);
 	void alterOrganization(Organization organization);
+	List<Long> getIdsByAdminId(long adminId);
 }

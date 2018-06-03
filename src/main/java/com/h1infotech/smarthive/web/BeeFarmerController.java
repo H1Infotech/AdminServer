@@ -1,52 +1,164 @@
-//package com.h1infotech.smarthive.web;
-//
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import javax.servlet.http.HttpServletRequest;
-//import com.h1infotech.smarthive.common.Response;
-//import com.h1infotech.smarthive.domain.BeeFarmer;
-//import com.h1infotech.smarthive.domain.Organization;
-//import com.h1infotech.smarthive.common.BizCodeEnum;
-//import com.h1infotech.smarthive.common.JwtTokenUtil;
-//import com.h1infotech.smarthive.service.OrganizationService;
-//import com.h1infotech.smarthive.service.AdminService;
-//import com.h1infotech.smarthive.common.BusinessException;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.ResponseBody;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//@RestController
-//public class BeeFarmerController {
-//	
-//	private Logger logger = LoggerFactory.getLogger(BeeFarmerController.class);
-//	
-//    @Autowired
-//    JwtTokenUtil jwtTokenUtil;
-//	
-//	@Autowired
-//	OrganizationService partnerService;
-//	
-//    @Autowired
-//	AdminService beeFarmerService;
-//	
-//	@GetMapping(path = "/getUserDisplayInfo")
-//    @ResponseBody
-//    public Response<Object> getBeeFarmerEntity(HttpServletRequest httpRequest) {
-//    	try {
-//    		logger.info("====Catching the Request for Getting Bee Farmer( token: " + httpRequest.getHeader("token") + "====");
-//    		BeeFarmer beeFarmer = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
-//    		if(beeFarmer.getOrganizationId()!=null) {
-//    			Organization partner = partnerService.getOrganizationById(beeFarmer.getOrganizationId());
-//    			beeFarmer.setOrganizationName(partner.getContactName());
-//    		}
-//    		return Response.success(beeFarmer);
-//    	} catch(BusinessException e) {
-//    		logger.error("Update Password Error", e);
-//    		return Response.fail(e.getCode(),e.getMessage());
-//    	} catch(Exception e) {
-//    		logger.error("Update Password Error", e);
-//    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
-//    	}
-//    }
-//}
+package com.h1infotech.smarthive.web;
+
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import javax.servlet.http.HttpServletRequest;
+import com.h1infotech.smarthive.domain.Admin;
+import com.h1infotech.smarthive.common.MyUtils;
+import com.h1infotech.smarthive.domain.BeeFarmer;
+import com.h1infotech.smarthive.common.Response;
+import com.h1infotech.smarthive.common.BizCodeEnum;
+import com.h1infotech.smarthive.common.JwtTokenUtil;
+import com.h1infotech.smarthive.common.AdminTypeEnum;
+import com.h1infotech.smarthive.common.AdminRightEnum;
+import com.h1infotech.smarthive.service.BeeFarmerService;
+import com.h1infotech.smarthive.common.BusinessException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.h1infotech.smarthive.service.OrganizationService;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.RestController;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
+import com.h1infotech.smarthive.web.request.BeeFarmerDeletionRequest;
+import com.h1infotech.smarthive.web.request.BeeFarmerAddAndUpdateRequest;
+import com.h1infotech.smarthive.web.request.BeeFarmerPageRetrievalRequest;
+import com.h1infotech.smarthive.web.response.BeeFarmerPageRetrievalResponse;
+
+@RestController
+public class BeeFarmerController {
+	
+	private Logger logger = LoggerFactory.getLogger(BeeFarmerController.class);
+	
+    @Autowired
+    JwtTokenUtil jwtTokenUtil;
+	
+	@Autowired
+	BeeFarmerService beeFarmerService;
+	
+	@Autowired
+	OrganizationService organizationService;
+	
+	@Autowired
+	BeeFarmerRepository beeFarmerRepository;
+	
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+    @PostMapping(path = "/getPageFarmers")
+    @ResponseBody
+	public Response<BeeFarmerPageRetrievalResponse> getPageFarmers(HttpServletRequest httpRequest, @RequestBody BeeFarmerPageRetrievalRequest request){
+    	try {
+    		logger.info("====Catching the Request for Getting Paged Bee Farmers: {}====",JSONObject.toJSONString(request));
+    		Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+    		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+    		if(admin==null) {
+    			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    		}
+    		if(request==null || request.getPageNo()==null || request.getPageSize()==null) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
+    		BeeFarmerPageRetrievalResponse response = null;
+    		switch(AdminTypeEnum.getEnum(admin.getType())) {
+    		case SUPER_ADMIN:
+    		case SENIOR_ADMIN:
+    			response = beeFarmerService.getBeeFarmers(request.getPageNo(), request.getPageSize());
+    			break;
+    		case ORGANIZATION_ADMIN:
+    			List<Long> ids = organizationService.getIdsByAdminId(admin.getId());
+    			response = beeFarmerService.getBeeFarmers(ids,request.getPageNo(), request.getPageSize());
+    			break;
+    		case NO_ORGANIZATION_ADMIN:
+    			response = beeFarmerService.getBeeFarmersWithoutOrganization(request.getPageNo(), request.getPageSize());
+    			break;
+    		}
+    		return Response.success(response);
+    	} catch(BusinessException e) {
+    		logger.error("====Get Page Organization Error====", e);
+    		return Response.fail(e.getCode(),e.getMessage());
+    	} catch(Exception e) {
+    		logger.error("====Get Page Organization Error====", e);
+    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    	}
+	}
+    
+    @PostMapping(path = "/deleteFarmers")
+	@ResponseBody
+	public Response<String> deleteFarmers(HttpServletRequest httpRequest, @RequestBody BeeFarmerDeletionRequest request){
+		try {
+			logger.info("====Catching the Request for Deleting Bee Farmers====");
+			if(request==null || request.getIds()==null||request.getIds().size()==0) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			if (!admin.getRights().contains(AdminRightEnum.BEEFARMER_MANAGEMENT.getRight())) {
+				throw new BusinessException(BizCodeEnum.NO_RIGHT);
+			}
+			beeFarmerService.delete(request.getIds());
+			return Response.success(null);
+		} catch (BusinessException e) {
+			logger.error("====Delete Organization Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Delete Organization Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+	
+	@PostMapping(path = "/alterBeeFarmer")
+	@ResponseBody
+	public Response<String> alterBeeFarmer(HttpServletRequest httpRequest, @RequestBody BeeFarmerAddAndUpdateRequest request){
+		try {
+			logger.info("====Catching the Request for Getting Paged Organizations====");
+			if(request==null||StringUtils.isEmpty(request.getName())) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			if (!admin.getRights().contains(AdminRightEnum.BEEFARMER_MANAGEMENT.getRight())) {
+				throw new BusinessException(BizCodeEnum.NO_RIGHT);
+			}
+			BeeFarmer beeFarmer = null;
+			if(request.getId()==null) {
+				int count = 50;
+				String userName = null;
+				do {
+					userName = MyUtils.getUserName(request.getName());
+					beeFarmer = beeFarmerService.getBeeFarmerByUserName(userName);
+				}while(beeFarmer==null && count-- > 0);
+				if(beeFarmer!=null) {
+					throw new BusinessException(BizCodeEnum.REGISTER_USER_EXIST_ERROR);
+				}
+				beeFarmer = request.getBeeFarmerAdd();
+				beeFarmer.setUsername(userName);
+				beeFarmer.setPassword(bCryptPasswordEncoder.encode(beeFarmer.getPassword()));
+			}else {
+				BeeFarmer beeFarmerDB  = beeFarmerService.getBeeFarmerByUserName(request.getUsername());
+				if(beeFarmerDB==null) {
+					throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+				}
+				beeFarmer = request.getBeeFarmerUpdate();
+				beeFarmer.setPassword(beeFarmerDB.getPassword());
+			}
+			beeFarmerRepository.save(beeFarmer);
+			return Response.success(null);
+		} catch (BusinessException e) {
+			logger.error("====Add | Update BeeFarmer Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Add | Update BeeFarmer Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+}

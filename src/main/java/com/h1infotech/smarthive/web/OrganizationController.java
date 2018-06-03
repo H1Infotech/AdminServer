@@ -10,15 +10,18 @@ import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.domain.Organization;
-import com.h1infotech.smarthive.common.AdminRightEnum;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
+import com.h1infotech.smarthive.common.AdminRightEnum;
 import com.h1infotech.smarthive.common.BusinessException;
+import com.h1infotech.smarthive.service.BeeFarmerService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.h1infotech.smarthive.web.request.OrganizationAddUpdateRequest;
 import com.h1infotech.smarthive.web.request.OrganizationDeletionRequest;
 import com.h1infotech.smarthive.web.request.OrganizationPageRetrievalRequest;
 import com.h1infotech.smarthive.web.response.OrganizationPageRetrievalResponse;
@@ -33,6 +36,9 @@ public class OrganizationController {
 	
 	@Autowired
 	OrganizationService organizationService;
+	
+	@Autowired
+	BeeFarmerService beeFarmerService;
 	
     @PostMapping(path = "/getPageOrganizations")
     @ResponseBody
@@ -128,6 +134,7 @@ public class OrganizationController {
     		case NO_ORGANIZATION_ADMIN:
     			return Response.fail(BizCodeEnum.NO_RIGHT);
     		}
+			beeFarmerService.wipeOutOrganizationId(request.getIds());
 			return Response.success(null);
 		} catch (BusinessException e) {
 			logger.error("====Delete Organization Error====", e);
