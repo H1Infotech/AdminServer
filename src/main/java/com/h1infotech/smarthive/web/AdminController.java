@@ -58,7 +58,7 @@ public class AdminController {
 	public Response<AdminPageRetrievalResponse> getPageAdmins(HttpServletRequest httpRequest, @RequestBody AdminPageRetrievalRequest request){
     	try {
     		logger.info("====Catching the Request for Getting Paged Admins: {}====",JSONObject.toJSONString(request));
-    		Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+    		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
     			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
@@ -90,7 +90,7 @@ public class AdminController {
     public Response<List<Admin>> getAllOrganizationAdmins(HttpServletRequest httpRequest){
     	try {
     		logger.info("====Catching the Request for Getting All Organization Admins====");
-    		Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+    		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
     			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
@@ -130,7 +130,7 @@ public class AdminController {
 			if(request==null||StringUtils.isEmpty(request.getName())) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
-			Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 
 			Admin alterAdmin = null;

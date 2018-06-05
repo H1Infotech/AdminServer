@@ -15,7 +15,9 @@ public interface BeeFarmerRepository extends PagingAndSortingRepository<BeeFarme
 	BeeFarmer findByIdAndOrganizationId(Long id, Long organizationId);
     BeeFarmer findDistinctFirstByUsername(String username);
     List<BeeFarmer> findByOrganizationId(Long organizationId);
+    List<BeeFarmer> findByOrganizationIdIn(List<Long> ids);
     Page<BeeFarmer> findByOrganizationIdIsNull(Pageable page);
+    List<BeeFarmer> findByOrganizationIdIsNull();
     Page<BeeFarmer> findByOrganizationIdIn(List<Long> ids, Pageable page);
     void deleteByIdIn(List<Long> ids);
     @Query(value = "update beeFarmer set organizationId = null where organizationId in: organizationIds", nativeQuery = true)  

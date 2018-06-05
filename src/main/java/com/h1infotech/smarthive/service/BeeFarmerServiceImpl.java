@@ -89,6 +89,20 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 		}
 		return response;
 	}
+	
+	@Override
+	public List<Long> getBeeFarmerIdsWithoutOrganization() {
+		List<BeeFarmer> beeFarmers =  beeFarmerRepository.findByOrganizationIdIsNull();
+		if(beeFarmers==null || beeFarmers.size()==0) {
+			return null;
+		}
+		List<Long> ids = new LinkedList<Long>();
+		for(BeeFarmer beeFarmer: beeFarmers) {
+			ids.add(beeFarmer.getId());
+		}
+		return ids;
+	}
+	
 	@Override
 	public BeeFarmerPageRetrievalResponse getBeeFarmersWithoutOrganization(int pageNo, int pageSize) {
 		if(pageNo < 1 || pageSize < 0) {
@@ -146,6 +160,22 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 	
 	public List<BeeFarmer> getOrganizationBeeFarmers(Long organizationId){
 		return beeFarmerRepository.findByOrganizationId(organizationId);
+	}
+	
+	@Override
+	public List<Long> getBeeFarmerIdsByOrganizationIdIn(List<Long> organizationIds) {
+		if(organizationIds==null || organizationIds.size()==0) {
+			return null;
+		}
+		List<BeeFarmer> beeFarmers = beeFarmerRepository.findByOrganizationIdIn(organizationIds);
+		if(beeFarmers == null || beeFarmers.size() == 0) {
+			return null;
+		}
+		List<Long> beeFarmerIds = new LinkedList<Long>();
+		for(BeeFarmer beeFarmer: beeFarmers) {
+			beeFarmerIds.add(beeFarmer.getId());
+		}
+		return beeFarmerIds;
 	}
 	
 	@Override

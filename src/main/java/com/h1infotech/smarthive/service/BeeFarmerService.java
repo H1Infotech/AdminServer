@@ -9,10 +9,13 @@ public interface BeeFarmerService {
 //	Organization getByOrganizationIdAndId(Long organizationId, Long Id);
 	void wipeOutOrganizationId(List<Long> organizationIds);
 	List<BeeFarmer> getOrganizationBeeFarmers(Long organizatioId);
+	List<Long> getBeeFarmerIdsByOrganizationIdIn(List<Long> organizationIds);
 	BeeFarmer getBeeFarmerByUserName(String userName);
 	BeeFarmerPageRetrievalResponse getBeeFarmers(int pageNo, int pageSize);
 	BeeFarmerPageRetrievalResponse getBeeFarmers(List<Long> ids, int pageNo, int pageSize);
+	List<Long> getBeeFarmerIdsWithoutOrganization();
 	BeeFarmerPageRetrievalResponse getBeeFarmersWithoutOrganization(int pageNo, int pageSize);
+
 //	List<Organization> getOrganization();
 //	List<Organization> getOrganization(long adminId);
 	void delete(List<Long> ids);

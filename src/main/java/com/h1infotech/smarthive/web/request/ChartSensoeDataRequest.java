@@ -5,7 +5,7 @@ import java.util.Date;
 public class ChartSensoeDataRequest {
 	
 	private Date beginDate;
-	private Date endData;
+	private Date endDate;
 	private Long boxId;
 	
 	public Date getBeginDate() {
@@ -14,11 +14,11 @@ public class ChartSensoeDataRequest {
 	public void setBeginDate(Date beginDate) {
 		this.beginDate = beginDate;
 	}
-	public Date getEndData() {
-		return endData;
+	public Date getEndDate() {
+		return endDate;
 	}
-	public void setEndData(Date endData) {
-		this.endData = endData;
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 	public Long getBoxId() {
 		return boxId;

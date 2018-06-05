@@ -48,7 +48,7 @@ public class OrganizationController {
 	public Response<OrganizationPageRetrievalResponse> getOrganizations(HttpServletRequest httpRequest, @RequestBody OrganizationPageRetrievalRequest request){
     	try {
     		logger.info("====Catching the Request for Getting Paged Organizations: {}====",JSONObject.toJSONString(request));
-    		Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+    		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
     			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
@@ -83,7 +83,7 @@ public class OrganizationController {
 	public Response<List<Organization>> getAllOrganizations(HttpServletRequest httpRequest) {
 		try {
 			logger.info("====Catching the Request for Getting Paged Organizations====");
-			Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 			if (admin == null) {
 				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
@@ -118,7 +118,7 @@ public class OrganizationController {
 			if(request==null || request.getIds()==null||request.getIds().size()==0) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
-			Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 			if (admin == null) {
 				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
@@ -156,7 +156,7 @@ public class OrganizationController {
 			if(request==null) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
-			Admin admin = jwtTokenUtil.getBeeFarmerFromToken(httpRequest.getHeader("token"));
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 			if (admin == null) {
 				throw new BusinessException(BizCodeEnum.NO_USER_INFO);

@@ -56,7 +56,7 @@ public class JwtTokenUtil {
         return String.valueOf(claims.get(CLAIM_KEY_USERNAME));
     }
     
-    public Admin getBeeFarmerFromToken(String token) {
+    public Admin getAdmin(String token) {
     	if(StringUtils.isEmpty(token)) {
     		return null;
     	}
