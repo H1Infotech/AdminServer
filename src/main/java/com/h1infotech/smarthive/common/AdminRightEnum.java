@@ -6,6 +6,11 @@ public enum AdminRightEnum {
 	BEEFARMER_MANAGEMENT(3),
 	BEEBOX_MANAGEMENT(4),
 	EVENT_MANAGEMENT(5),
+	ADMIN_QUERY(6),
+	ORGANIZATION_QUERY(7),
+	BEEFARMER_QUERY(8),
+	BEEBOX_QUERY(9),
+	EVENT_QUERY(10),
 	;
 	
 	private int right;
@@ -19,17 +24,11 @@ public enum AdminRightEnum {
 	}
 	
 	public AdminRightEnum getRight(int right) {
-		if(right==1) {
-			return ADMIN_MANAGEMENT;
-		}else if(right==2) {
-			return ORGANIZATION_MANAGEMENT;
-		}else if(right==3) {
-			return BEEFARMER_MANAGEMENT;
-		}else if(right==4) {
-			return BEEBOX_MANAGEMENT;
-		}else if(right==5) {
-			return EVENT_MANAGEMENT;
+		for(AdminRightEnum element: AdminRightEnum.values()) {
+			if(element.right == right) {
+				return element;
+			}
 		}
-		return null;
+		throw new BusinessException(BizCodeEnum.NO_RIGHT);
 	}
 }

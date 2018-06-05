@@ -144,6 +144,10 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 		beeFarmerRepository.wipeOutOrganizationId(organizationIds);
 	}
 	
+	public List<BeeFarmer> getOrganizationBeeFarmers(Long organizationId){
+		return beeFarmerRepository.findByOrganizationId(organizationId);
+	}
+	
 	@Override
 	@Transactional
 	public void delete(List<Long> ids) {

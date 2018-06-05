@@ -18,6 +18,8 @@ import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,12 @@ import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.web.request.BeeFarmerDeletionRequest;
 import com.h1infotech.smarthive.web.request.BeeFarmerAddAndUpdateRequest;
 import com.h1infotech.smarthive.web.request.BeeFarmerPageRetrievalRequest;
+import com.h1infotech.smarthive.web.request.OrganizationBeeFarmerRetrievalRequst;
+import com.h1infotech.smarthive.web.request.OrganizationFarmerDeletionRequest;
 import com.h1infotech.smarthive.web.response.BeeFarmerPageRetrievalResponse;
 
 @RestController
+@RequestMapping("/api")
 public class BeeFarmerController {
 	
 	private Logger logger = LoggerFactory.getLogger(BeeFarmerController.class);
@@ -149,6 +154,7 @@ public class BeeFarmerController {
 					throw new BusinessException(BizCodeEnum.NO_USER_INFO);
 				}
 				beeFarmer = request.getBeeFarmerUpdate();
+				beeFarmer.setCreateDate(beeFarmerDB.getCreateDate());
 				beeFarmer.setPassword(beeFarmerDB.getPassword());
 			}
 			beeFarmerRepository.save(beeFarmer);
@@ -158,6 +164,44 @@ public class BeeFarmerController {
 			return Response.fail(e.getCode(), e.getMessage());
 		} catch (Exception e) {
 			logger.error("====Add | Update BeeFarmer Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+	
+	@PostMapping(path = "/getOrganizationBeeFarmers")
+	@ResponseBody
+	public Response<List<BeeFarmer>> getOrganizationBeeFarmers(HttpServletRequest httpRequest, @RequestBody OrganizationBeeFarmerRetrievalRequst request){
+		try {
+			if(request==null || request.getOrganizationId()==null) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			return Response.success(beeFarmerService.getOrganizationBeeFarmers(request.getOrganizationId()));
+		} catch (BusinessException e) {
+			logger.error("====getOrganizationBeeFarmers Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====getOrganizationBeeFarmers Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+	
+	@PostMapping(path = "/deleteOrganizationFarmer")
+	@ResponseBody
+	public Response<String> getOrganizationBeeFarmers(HttpServletRequest httpRequest, @RequestBody OrganizationFarmerDeletionRequest request){
+		try {
+			if(request==null || request.getOrganizationId()==null
+					|| request.getFarmerId()==null) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			BeeFarmer beeFarmer = beeFarmerRepository.findByIdAndOrganizationId(request.getFarmerId(),request.getOrganizationId());
+			beeFarmer.setOrganizationId(null);
+			beeFarmerRepository.save(beeFarmer);
+			return Response.success(null);
+		} catch (BusinessException e) {
+			logger.error("====getOrganizationBeeFarmers Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====getOrganizationBeeFarmers Error====", e);
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 	}

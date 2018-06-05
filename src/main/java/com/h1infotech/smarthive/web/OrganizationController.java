@@ -16,6 +16,8 @@ import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.service.BeeFarmerService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import com.h1infotech.smarthive.web.request.OrganizationPageRetrievalRequest;
 import com.h1infotech.smarthive.web.response.OrganizationPageRetrievalResponse;
 
 @RestController
+@RequestMapping("/api")
 public class OrganizationController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationController.class);

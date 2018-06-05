@@ -12,7 +12,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface BeeFarmerRepository extends PagingAndSortingRepository<BeeFarmer, Long> {
+	BeeFarmer findByIdAndOrganizationId(Long id, Long organizationId);
     BeeFarmer findDistinctFirstByUsername(String username);
+    List<BeeFarmer> findByOrganizationId(Long organizationId);
     Page<BeeFarmer> findByOrganizationIdIsNull(Pageable page);
     Page<BeeFarmer> findByOrganizationIdIn(List<Long> ids, Pageable page);
     void deleteByIdIn(List<Long> ids);

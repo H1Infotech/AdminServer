@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AdminRightRepository extends JpaRepository<AdminRight, Long> {
 	List<AdminRight> findByAdminIdIs(Long adminId);
+	void deleteByAdminId(Long id);
 }
