@@ -28,13 +28,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.BeeBoxRepository;
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.h1infotech.smarthive.web.request.BeeBoxAddRequest;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.h1infotech.smarthive.repository.SensorDataRepository;
 import com.h1infotech.smarthive.service.IntervalSensorDataService;
 import com.h1infotech.smarthive.web.response.OverviewDataResponse;
-import com.h1infotech.smarthive.web.request.BeeBoxAddRequest;
 import com.h1infotech.smarthive.web.request.BeeBoxDeletionRequest;
 import com.h1infotech.smarthive.web.request.BeeBoxRetrievalRequest;
 import com.h1infotech.smarthive.web.request.ChartSensoeDataRequest;
@@ -76,7 +76,7 @@ public class BeeBoxController {
     		if(request == null) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
-    		logger.info("====Catching the Request for Getting beeBox: {}====",JSONObject.toJSONString(request));
+    		logger.info("====Catching the Request for Getting beeBox: {}====");
     		Admin admin = jwtTokenUtil.getAdmin(request.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
@@ -107,14 +107,14 @@ public class BeeBoxController {
     }
     
     
-    @GetMapping(path = "/getPagedBeeBoxes")
+    @PostMapping(path = "/getPagedBeeBoxes")
     @ResponseBody
     public Response<BeeBoxPageRetrievalResponse> getPagedBeeBoxes(HttpServletRequest httpRequest, @RequestBody BeeBoxPageRetrievalRequest request) {
     	try {
     		if(request==null || request.getPageNo()==null || request.getPageSize()==null) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
-    		logger.info("====Catching the Request for Getting beeBox: {}====",JSONObject.toJSONString(httpRequest));
+    		logger.info("====Catching the Request for Getting beeBox: {}====");
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
@@ -176,14 +176,14 @@ public class BeeBoxController {
     	}
     }
     
-    @GetMapping(path = "/deleteBeeBoxes")
+    @PostMapping(path = "/deleteBeeBoxes")
     @ResponseBody
     public Response<String> deleteBeeBox(HttpServletRequest httpRequest, @RequestBody BeeBoxDeletionRequest request) {
     	try {
     		if(request==null || request.getIds()==null || request.getIds().size()==0) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
-    		logger.info("====Catching the Request for Getting beeBox: {}====",JSONObject.toJSONString(httpRequest));
+    		logger.info("====Catching the Request for Getting beeBox: {}====");
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
@@ -200,7 +200,7 @@ public class BeeBoxController {
     	}
     }
     
-    @GetMapping(path = "/getBeeBox")
+    @PostMapping(path = "/getBeeBox")
     @ResponseBody
     public Response<BeeBox> getBeeBoxSensorData(HttpServletRequest request, @RequestBody BeeBoxRetrievalRequest beeBoxRequest){
     	try {
@@ -223,7 +223,7 @@ public class BeeBoxController {
     	}
     }
 
-    @GetMapping(path = "/getBeeBoxSensorData")
+    @PostMapping(path = "/getBeeBoxSensorData")
     @ResponseBody
     public Response<List<SensorData>> getBeeBoxSensorData(HttpServletRequest httpRequest, @RequestBody BeeBoxSensorDataRequest request){
     	try {
@@ -257,7 +257,7 @@ public class BeeBoxController {
     		if(request == null) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
-    		logger.info("====Catching the Request for Getting beeBox: {}====",JSONObject.toJSONString(request));
+    		logger.info("====Catching the Request for Getting beeBox: {}====");
     		Admin admin = jwtTokenUtil.getAdmin(request.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {

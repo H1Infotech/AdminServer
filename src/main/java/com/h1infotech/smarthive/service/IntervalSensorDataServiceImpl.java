@@ -1,14 +1,12 @@
 package com.h1infotech.smarthive.service;
 
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-
+import java.util.LinkedList;
+import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.domain.IntervalSensorData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.h1infotech.smarthive.repository.IntervalSensorDataRepository;
 
 @Service
@@ -19,7 +17,7 @@ public class IntervalSensorDataServiceImpl implements IntervalSensorDataService 
 	
 	@Override
 	public List<IntervalSensorData> getIntervalSensorData(Long boxId, Date beginDate, Date endData) {
-		try {
+		try {             
 			List<IntervalSensorData> sensorData = intervalSensorDataRepository.findByBoxIdIsAndCreateDateBetweenOrderByCreateDateAsc(boxId, beginDate, endData);
 			if(sensorData.size() <= 300) {
 				return sensorData;
