@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface BeeBoxGroupRepository extends JpaRepository<BeeBoxGroup, Long> {
 	List<BeeBoxGroup> findByAdminId(Long id);
 	void deleteByIdIn(List<Long> ids);
+	List<BeeBoxGroup> deleteByAdminIdIn(List<Long> adminIds);
 	BeeBoxGroup findByAdminIdAndGroupName(Long adminId, String groupName);
 }

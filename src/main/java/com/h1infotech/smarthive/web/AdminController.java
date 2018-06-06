@@ -1,14 +1,15 @@
 package com.h1infotech.smarthive.web;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.LinkedList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
-
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.Admin;
 import com.h1infotech.smarthive.domain.AdminRight;
+import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.MyUtils;
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.common.BizCodeEnum;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.AdminRepository;
 import com.h1infotech.smarthive.repository.AdminRightRepository;
+import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
+import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,12 @@ public class AdminController {
 	
 	@Autowired
 	AdminRepository adminRepository;
+	
+	@Autowired
+	BeeBoxGroupRepository beeBoxGroupRepository;
+	
+	@Autowired
+	BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
 	
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -111,7 +120,16 @@ public class AdminController {
     	try {
     		logger.info("====Catching the Request for Deleting Admins====");
     		adminRepository.deleteByIdIn(request.getAdminIds());
-    		return Response.success(null);
+    		List<BeeBoxGroup> beeBoxGroups = beeBoxGroupRepository.deleteByAdminIdIn(request.getAdminIds());
+    		if(beeBoxGroups==null||beeBoxGroups.size()==0) {
+    			return Response.success(null);
+    		}
+    		List<Long> beeBoxGroupIds = new LinkedList<Long>();
+    		for(BeeBoxGroup beeBoxGroup: beeBoxGroups) {
+    			beeBoxGroupIds.add(beeBoxGroup.getId());
+    		}
+    		beeBoxGroupAssociationRepository.deleteByGroupIdIn(beeBoxGroupIds);
+			return Response.success(null);
     	} catch(BusinessException e) {
     		logger.error("====Get Organization Admin Error====", e);
     		return Response.fail(e.getCode(),e.getMessage());
