@@ -16,6 +16,7 @@ public enum BizCodeEnum {
 	DATABASE_ACCESS_ERROR("000040","Database Access Error"),
 	ADD_EMPTY_BEEBOX("000050","Add an Empty BeeBox"),
 	ILLEGAL_INPUT("000090","Illegal Input Parameter(s)"),
+	BEE_BOX_GROUP_EXISTS("000100","Group Name Already Exists"),
 	SERVICE_ERROR("999999","Service Error"),
 	
 	
