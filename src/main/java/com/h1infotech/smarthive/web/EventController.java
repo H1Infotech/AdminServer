@@ -133,7 +133,7 @@ public class EventController {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
     		Event event = request.getEvent();
-    		//1:溫度，2：濕度，3壓強，4電量,5重力
+    		//1:温度，2：湿度，3压强，4电量，5重力
     		String action = null;
     		String condition = null;
     		if(event.getRuleType()==1) {

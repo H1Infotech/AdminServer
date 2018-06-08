@@ -5,16 +5,13 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedList;
 import com.h1infotech.smarthive.domain.Event;
-import org.springframework.stereotype.Service;
-
-import com.h1infotech.smarthive.common.AdminTypeEnum;
-import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.Admin;
+import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.BeeBoxGroup;
+import com.h1infotech.smarthive.common.AdminTypeEnum;
+import com.h1infotech.smarthive.repository.AdminRepository;
 import com.h1infotech.smarthive.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.h1infotech.smarthive.repository.AdminRepository;
 import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 
 @Service
