@@ -51,7 +51,7 @@ public class SmsSender {
         return client.sms().tpl_single_send(param);
     }
 
-    public void dispatchSMSService(String serviceType, String mobile) {
+    public void dispatchSMSService(String serviceType, String mobile, KV...kvs) {
     	if(SmsSender.SmsTemplateEnum.VERIFICATION_CODE.getTemplateId().equals(serviceType)) {
     		Random random = new Random();
     		String codeNum = String.valueOf(random.nextInt(9000)+1000);
@@ -60,6 +60,10 @@ public class SmsSender {
     		this.send(SmsSender.SmsTemplateEnum.VERIFICATION_CODE, mobile, promopt,code);
     		stringRedisTemplate.opsForValue().set(VERIFICATION_CODE_KEY_PREFIX+mobile, codeNum, 15, TimeUnit.MINUTES);
     		logger.info("====Sending Verification Code: {}====", codeNum);
+    	}else if(SmsSender.SmsTemplateEnum.BOX_EXCEPTION_NOTIFICATION.getTemplateId().equals(serviceType)){
+    		this.send(SmsSender.SmsTemplateEnum.BOX_EXCEPTION_NOTIFICATION, mobile, kvs);
+    		logger.info("====Sending BOX_EXCEPTION_NOTIFICATION====");
+
     	}
     }
     public static enum SmsTemplateEnum {

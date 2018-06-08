@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface BeeBoxRepository extends JpaRepository<BeeBox, Long>, JpaSpecificationExecutor<BeeBox> {
-	BeeBox findByFarmerId(Long farmerId);
+	BeeBox findFirstByFarmerId(Long farmerId);
 	List<BeeBox> findBeeBoxesByFarmerId(Long farmerId);
 	List<BeeBox> findByFarmerIdIn(List<Long> ids);
 	List<BeeBox> findByIdIn(List<Long> ids);

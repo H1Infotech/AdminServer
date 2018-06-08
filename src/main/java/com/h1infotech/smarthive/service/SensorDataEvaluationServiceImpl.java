@@ -2,6 +2,7 @@ package com.h1infotech.smarthive.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.expression.ExpressionParser;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -13,8 +14,11 @@ public class SensorDataEvaluationServiceImpl implements SensorDataEvaluationServ
 	
 	@Override
 	public boolean evaluate(String ruleExpression, Object context) {
-		 EvaluationContext ctx = new StandardEvaluationContext();
-	     ctx.setVariable(DEFAULT_CONTEXT_KEY, context);
-	     return (boolean) PARSER.parseExpression(ruleExpression).getValue(ctx);
+		if(StringUtils.isEmpty(ruleExpression) || context==null) {
+			return true;
+		}
+		EvaluationContext ctx = new StandardEvaluationContext();
+	    ctx.setVariable(DEFAULT_CONTEXT_KEY, context);
+	    return (boolean) PARSER.parseExpression(ruleExpression).getValue(ctx);
 	}
 }
