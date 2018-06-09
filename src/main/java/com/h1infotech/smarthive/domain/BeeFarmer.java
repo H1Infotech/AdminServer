@@ -30,12 +30,17 @@ public class BeeFarmer {
 	@Transient
 	private String OrganizationName;
 
+	@JsonIgnore
 	public String getDesc() {
 		DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
+		System.err.println(createDate==null);
+		System.err.println(updateDate==null);
+
 		return id+"_"+name+"_"+username
 				 +"_"+address+"_"+mobile
 				 +"_"+OrganizationName+"_"+email
-				 +"_"+df3.format(createDate)+df3.format(updateDate);
+				 +"_"+createDate==null?null:df3.format(createDate)
+				 +"_"+updateDate==null?null:df3.format(updateDate);
 	}
 	
 	public Integer getBeeBoxNum() {

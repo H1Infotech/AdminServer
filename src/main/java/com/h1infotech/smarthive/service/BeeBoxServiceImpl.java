@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.h1infotech.smarthive.web.response.BeeBoxPageRetrievalResponse;
 
@@ -21,7 +22,8 @@ public class BeeBoxServiceImpl implements BeeBoxService {
 	
 	@Override
     public List<BeeBox> getAllBeeBoxes() {
-		return beeBoxRepository.findAll();
+		Sort sort = new Sort(Sort.Direction.ASC,"id");
+		return beeBoxRepository.findAll(sort);
     }
 	
 	@Override 
@@ -29,7 +31,7 @@ public class BeeBoxServiceImpl implements BeeBoxService {
 		if(pageNo < 1 || pageSize < 0) {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
-		Pageable page = PageRequest.of(pageNo-1, pageSize);
+		Pageable page = PageRequest.of(pageNo-1, pageSize, Sort.Direction.ASC, "id");
 		Page<BeeBox> pageBeeBox = beeBoxRepository.findAll(page);
 		BeeBoxPageRetrievalResponse response = new BeeBoxPageRetrievalResponse();
 		if(pageBeeBox==null || pageBeeBox.getContent()==null) {

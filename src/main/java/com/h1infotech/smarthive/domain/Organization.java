@@ -3,6 +3,8 @@ package com.h1infotech.smarthive.domain;
 import java.util.Date;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "organization")
 public class Organization {
@@ -20,6 +22,7 @@ public class Organization {
     private String contactPhone;
     private String organizationName;
     
+    @JsonIgnore
     public String getDesc() {
     	return id+"_"+email+"_"+address+"_"+contactName+"_"+contactPhone+"_"+organizationName;
     }

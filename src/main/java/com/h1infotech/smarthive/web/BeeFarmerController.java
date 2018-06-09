@@ -1,11 +1,8 @@
 package com.h1infotech.smarthive.web;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
+import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -22,21 +19,20 @@ import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 import com.h1infotech.smarthive.repository.BeeFarmerRepository;
-import com.h1infotech.smarthive.web.request.BeeFarmerDeletionRequest;
 import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
+import com.h1infotech.smarthive.web.request.BeeFarmerDeletionRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.h1infotech.smarthive.web.request.BeeFarmerAddAndUpdateRequest;
 import com.h1infotech.smarthive.web.request.BeeFarmerPageRetrievalRequest;
-import com.h1infotech.smarthive.web.request.OrganizationBeeFarmerRetrievalRequst;
-import com.h1infotech.smarthive.web.request.OrganizationFarmerDeletionRequest;
 import com.h1infotech.smarthive.web.response.BeeFarmerPageRetrievalResponse;
+import com.h1infotech.smarthive.web.request.OrganizationFarmerDeletionRequest;
+import com.h1infotech.smarthive.web.request.OrganizationBeeFarmerRetrievalRequst;
 
 @RestController
 @RequestMapping("/api")
@@ -246,23 +242,7 @@ public class BeeFarmerController {
     					}
     				}
     			}
-    			
-    			int startIndex = (request.getPageNo()-1) * request.getPageSize();
-    			int endIndex = (request.getPageNo()) * request.getPageSize();
-    			if(endIndex > beeFarmers.size()) {
-    				endIndex = beeFarmers.size();
-    			}
-    			if(startIndex>=beeFarmers.size()) {
-    				Map<String,Integer> res = new HashMap<String, Integer>();
-    				res.put("totalPageNo", request.getPageNo());
-    				res.put("currentPageNo", request.getPageSize());
-    				return Response.success(res);
-    			}
-    			Map<String,Object> res = new HashMap<String, Object>();
-    			res.put("totalPageNo", request.getPageNo());
-    			res.put("currentPageNo", request.getPageSize());
-    			res.put("data", beeFarmers);
-    			return Response.success(res);
+    			return Response.success(beeFarmers);
     		} catch(BusinessException e) {
     			logger.error("====Get Page Organization Error====", e);
     			return Response.fail(e.getCode(),e.getMessage());

@@ -1,18 +1,17 @@
 package com.h1infotech.smarthive.service;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import com.h1infotech.smarthive.domain.Admin;
-import com.h1infotech.smarthive.domain.Organization;
-
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Pageable;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import org.springframework.data.domain.PageRequest;
+import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.repository.AdminRepository;
@@ -46,7 +45,7 @@ public class AdminServiceImpl implements AdminService {
 		if(pageNo < 1 || pageSize < 0) {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
-		Pageable page = PageRequest.of(pageNo-1, pageSize);
+		PageRequest page = PageRequest.of(pageNo-1, pageSize, Sort.Direction.ASC, "id");
 		Page<Admin> pageAdmin = adminRepository.findByTypeNotAndIdNot(AdminTypeEnum.SUPER_ADMIN.getType(), excludeId, page);
 		AdminPageRetrievalResponse response = new AdminPageRetrievalResponse();
 		if(pageAdmin.getContent()!=null && pageAdmin.getContent().size()>0) {

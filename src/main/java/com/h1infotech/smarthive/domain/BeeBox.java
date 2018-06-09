@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.web.request.FilterItem;
 
@@ -33,7 +34,7 @@ import javax.persistence.GenerationType;
 
 @Entity
 @Table(name = "beeBox")
-public class BeeBox {
+public class BeeBox  implements Comparable<BeeBox> {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,12 +50,13 @@ public class BeeBox {
 	private Boolean protectionStrategy;
 	private Date updateSensorDataTime;
 	
+	@JsonIgnore
 	public String getDesc() {
     	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
     	String desc = id+"_"+farmerId+"_"+batchNo
-    			 +"_"+lat+"_"+lng+"_"+df3.format(entryDate)+"_"+manufacturer
-    			 +"_"+df3.format(productionDate)+latestSensorDataId
-    			 +"_"+df3.format(updateSensorDataTime);
+    			 +"_"+lat+"_"+lng+"_"+entryDate==null?null:df3.format(entryDate)+"_"+manufacturer
+    			 +"_"+productionDate==null?null:df3.format(productionDate)+latestSensorDataId
+    			 +"_"+updateSensorDataTime==null?null:df3.format(updateSensorDataTime);
     	if(status==0) {
     		desc+="正常";
     	}else if(status==2) {
@@ -63,6 +65,24 @@ public class BeeBox {
     		desc+="离线";
     	}
     	return desc;
+	}
+	
+	@Override
+	public int compareTo(BeeBox o) {
+		if(o==null || o.getId()==null) {
+			return 1;
+		}
+		if(this.id==null) {
+			return -1;
+		}
+		long diff = this.id - o.getId();
+		if(diff==0) {
+			return 0;
+		}else if(diff>0) {
+			return 1;
+		}else {
+			return -1;
+		}
 	}
 	
 	@Autowired
@@ -212,9 +232,4 @@ public class BeeBox {
 	public void setEntryDate(Date entryDate) {
 		this.entryDate = entryDate;
 	} 
-	@Override
-	public String toString() {
-		DateFormat mediumDateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM); 
-		return id+"_"+farmerId+"_"+batchNo+"_"+lat+"_"+lng+"_"+mediumDateFormat.format(entryDate)+"_"+manufacturer+"_"+mediumDateFormat.format(productionDate);
-	}
 }

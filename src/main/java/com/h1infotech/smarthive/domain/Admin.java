@@ -46,13 +46,14 @@ public class Admin implements Serializable, UserDetails {
     @Transient
     private List<Integer> rights;
     
+    @JsonIgnore
     public String getDesc() {
     	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
     	
     	String desc = id+"_"+name+"_"+username
-    			        +"_"+mobile+"_"+df3.format(createDate)
-    			        +"_"+df3.format(updateDate)+"_"+organizationName
-    			        +"_"+email+"_"+address+"_";
+    			        +"_"+mobile+"_"+createDate==null?null:df3.format(createDate)
+    			        +"_"+updateDate==null?null:df3.format(updateDate)+"_"+organizationName
+    			        +"_"+email+"_"+address;
     	if(type==2) {
     		desc+="高级管理员";
     	}else if(type==3) {

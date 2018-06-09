@@ -1,27 +1,26 @@
 package com.h1infotech.smarthive.web;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import org.slf4j.Logger;
-import java.util.Optional;
 import java.util.Set;
-
+import java.util.List;
+import java.util.Date;
+import org.slf4j.Logger;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.ArrayList;
 import org.slf4j.LoggerFactory;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import com.h1infotech.smarthive.domain.Event;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.BeeBox;
-import com.h1infotech.smarthive.domain.BeeBoxGroupAssociation;
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.SmsSender;
 import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.domain.SensorData;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.domain.SmsSender.KV;
+import com.h1infotech.smarthive.domain.HistoryAlertEvent;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,11 +30,14 @@ import com.h1infotech.smarthive.repository.BeeBoxRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import com.h1infotech.smarthive.domain.BeeBoxGroupAssociation;
 import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.repository.SensorDataRepository;
 import com.h1infotech.smarthive.service.SensorDataEvaluationService;
 import com.h1infotech.smarthive.web.request.RecevierSensorDataRequest;
+import com.h1infotech.smarthive.repository.HistoryAlertEventRepository;
 import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
+
 
 @RestController
 @RequestMapping("/api")
@@ -60,6 +62,9 @@ public class SensorDataReceiver {
 	
 	@Autowired
 	BeeFarmerRepository beeFarmerRepository;
+	
+	@Autowired
+	HistoryAlertEventRepository historyAlertEventRepository;
 	
 	@Autowired
 	SmsSender smsSender;
@@ -123,6 +128,13 @@ public class SensorDataReceiver {
 							}
 							kvs[2] = new KV("dataType",dataType);
 							kvs[3] = new KV("value", value);
+							String desc = "蜂箱: "+beeBoxDB.get().getId()+", "+dataType+"异常: "+value;
+							HistoryAlertEvent newEvent = new HistoryAlertEvent();
+							newEvent.setAdminId(event.getAdminId());
+							newEvent.setCreateDate(new Date());
+							newEvent.setEvent(desc);
+							newEvent.setHandleWay(null);
+							historyAlertEventRepository.save(newEvent);
 							smsSender.dispatchSMSService("2298876", beeFarmer.get().getMobile(), kvs);
 						}
 					}

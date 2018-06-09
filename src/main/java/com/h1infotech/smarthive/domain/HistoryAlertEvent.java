@@ -1,13 +1,19 @@
 package com.h1infotech.smarthive.domain;
 
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
-
+import java.text.DateFormat;
 import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 
+@Entity
+@Table(name = "historyAlertEvent")
 public class HistoryAlertEvent {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,9 +23,10 @@ public class HistoryAlertEvent {
 	private String handleWay;
 	private Date createDate;
 
+	@JsonIgnore
 	public String getDesc() {
     	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
-		return id+"_"+event+"_"+handleWay+"_"+df3.format(createDate);
+		return id+"_"+event+"_"+handleWay+"_"+createDate==null?null:df3.format(createDate);
 	}
 	
 	public Long getId() {

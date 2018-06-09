@@ -1,10 +1,8 @@
 package com.h1infotech.smarthive.web;
 
-import java.util.List;
 import java.util.Map;
-
+import java.util.List;
 import org.slf4j.Logger;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,11 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.Admin;
 import com.h1infotech.smarthive.common.MyUtils;
 import com.h1infotech.smarthive.common.Response;
+import com.h1infotech.smarthive.domain.SmsSender;
 import com.h1infotech.smarthive.domain.AdminRight;
 import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
+import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.service.AdminService;
+import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +29,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.h1infotech.smarthive.repository.AdminRightRepository;
 import com.h1infotech.smarthive.web.request.AdminDeletionRequest;
 import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
+import com.h1infotech.smarthive.repository.OrganizationRepository;
 import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.AdminAlterationRequest;
 import com.h1infotech.smarthive.web.request.AdminPageRetrievalRequest;
@@ -46,32 +49,42 @@ public class AdminController {
 	
 	private Logger logger = LoggerFactory.getLogger(AdminController.class);
 
-    @Autowired
-    JwtTokenUtil jwtTokenUtil;
+	@Autowired
+	OrganizationRepository organizationRepository;
+	
+	@Autowired
+	BeeFarmerService beeFarmerService;
 	
     @Autowired
-    AdminRightRepository adminRightRepository;
+    private JwtTokenUtil jwtTokenUtil;
     
 	@Autowired
-	AdminService adminService;
-	
+	private AdminService adminService;
+		
 	@Autowired
-	AdminRepository adminRepository;
-	
-	@Autowired
-	BeeBoxGroupRepository beeBoxGroupRepository;
-	
-	@Autowired
-	BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
+	private AdminRepository adminRepository;
 	
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private StringRedisTemplate stringRedisTemplate;
 	
+    @Autowired
+    private AdminRightRepository adminRightRepository;
+	
+	@Autowired
+	private BeeBoxGroupRepository beeBoxGroupRepository;
+	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	private BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
+	
+	//获取分页管理员
     @PostMapping(path = "/getPageAdmins")
     @ResponseBody
 	public Response<AdminPageRetrievalResponse> getPageAdmins(HttpServletRequest httpRequest, @RequestBody AdminPageRetrievalRequest request){
     	try {
-    		logger.info("====Catching the Request for Getting Paged Admins: {}====",JSONObject.toJSONString(request));
+    		logger.info("====Catching the Request for Getting Paged Admins: {}====",JSONObject.toJSON(request));
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
@@ -99,9 +112,10 @@ public class AdminController {
     	}
 	}
     
+    //获取所有的组织管理员
     @GetMapping(path = "/getAllOrganizationAdmins")
     @ResponseBody
-    public Response<List<Admin>> getAllOrganizationAdmins(HttpServletRequest httpRequest){
+    public Response<List<Admin>> getAllOrganizationAdmins(HttpServletRequest httpRequest) {
     	try {
     		logger.info("====Catching the Request for Getting All Organization Admins====");
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
@@ -119,12 +133,24 @@ public class AdminController {
     	}
     }
     
-    @GetMapping(path = "/deleteAdmins")
+    @PostMapping(path = "/deleteAdmins")
     @ResponseBody
     public Response<String> getAllOrganizationAdmins(HttpServletRequest httpRequest, @RequestBody AdminDeletionRequest request){
     	try {
-    		logger.info("====Catching the Request for Deleting Admins====");
+    		logger.info("====Catching the Request for Deleting Admins：{}====", JSONObject.toJSONString(request));
+    		if(request==null || request.getAdminIds()==null || request.getAdminIds().size()==0) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
     		adminRepository.deleteByIdIn(request.getAdminIds());
+    		List<Organization> organizations = organizationRepository.deleteByAdminIdIn(request.getAdminIds());
+    		if(organizations!=null && organizations.size()>0) {
+    			List<Long> organizationIds = new LinkedList<Long>();
+    			for(Organization organization: organizations) {
+    				organizationIds.add(organization.getId());
+    			}
+    			beeFarmerService.wipeOutOrganizationId(organizationIds);
+    		}
+    		adminRightRepository.deleteByAdminIdIn(request.getAdminIds());
     		List<BeeBoxGroup> beeBoxGroups = beeBoxGroupRepository.deleteByAdminIdIn(request.getAdminIds());
     		if(beeBoxGroups==null||beeBoxGroups.size()==0) {
     			return Response.success(null);
@@ -147,17 +173,30 @@ public class AdminController {
     
 	@PostMapping(path = "/alterAdmin")
 	@ResponseBody
-	public Response<String> alterAdmin(HttpServletRequest httpRequest, @RequestBody AdminAlterationRequest request){
+	public Response<Object> alterAdmin(HttpServletRequest httpRequest, @RequestBody AdminAlterationRequest request){
 		try {
-			logger.info("====Catching the Request for Altering Admin====");
-			if(request==null||StringUtils.isEmpty(request.getName())) {
+			logger.info("====Catching the Request for Altering Admin: {}====", JSONObject.toJSONString(request));
+			if(request==null
+					|| StringUtils.isEmpty(request.getName())) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
 			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 
 			Admin alterAdmin = null;
+			
+        	String code = stringRedisTemplate.opsForValue().get(SmsSender.VERIFICATION_CODE_KEY_PREFIX+request.getMobile());
+
+        	if(!StringUtils.isEmpty(code)) {
+        		if(code.equals(request.getCode())) {
+    				throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
+        		}
+        	}
+			
 			if(request.getId()==null) {
+				if(StringUtils.isEmpty(request.getPassword())) {
+					throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+				}
 				int count = 50;
 				String userName = null;
 				do {
@@ -181,8 +220,12 @@ public class AdminController {
 					throw new BusinessException(BizCodeEnum.NO_USER_INFO);
 				}
 				alterAdmin = request.getAdmin();
-				alterAdmin.setPassword(adminDB.getPassword());
-				alterAdmin.setCreateDate(adminDB.getCreateDate());
+				if(StringUtils.isEmpty(alterAdmin.getPassword())) {
+					alterAdmin.setPassword(adminDB.getPassword());
+				}else {
+					alterAdmin.setPassword(bCryptPasswordEncoder.encode(alterAdmin.getPassword()));
+				}
+				alterAdmin.setUpdateDate(adminDB.getUpdateDate());
 				adminRightRepository.deleteByAdminId(alterAdmin.getId());
 				if(request.getAdminRight()!=null && request.getAdminRight().size()>0) {
 					for(AdminRight adminRight: request.getAdminRight()) {

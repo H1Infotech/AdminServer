@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Date;
 import org.slf4j.Logger;
 import java.util.LinkedList;
+import java.util.Collections;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.data.domain.Sort;
 import org.apache.commons.lang3.StringUtils;
 import com.h1infotech.smarthive.domain.Admin;
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +70,8 @@ public class BeeBoxGroupController {
 			if (admin == null || admin.getId() == null) {
 				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
 			}
-			return Response.success(beeBoxGroupRepository.findByAdminId(admin.getId()));
+			Sort sort = new Sort(Sort.Direction.ASC, "id");
+			return Response.success(beeBoxGroupRepository.findByAdminId(admin.getId(), sort));
 		} catch (BusinessException e) {
 			logger.error(e.getMessage(), e);
 			return Response.fail(e.getCode(), e.getMessage());
@@ -111,17 +114,20 @@ public class BeeBoxGroupController {
 			if (request == null || request.getFilterItems() == null || request.getFilterItems().size() == 0) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
-
+			List<BeeBox> boxes = null;
 			List<BeeBox> beeBoxes = new LinkedList<BeeBox>();
-
 			switch (AdminTypeEnum.getEnum(admin.getType())) {
 			case SUPER_ADMIN:
 			case SENIOR_ADMIN:
+				
 				for (FilterItem filter : request.getFilterItems()) {
-					List<BeeBox> boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
 					if (boxes != null && boxes.size() >= 0) {
 						beeBoxes.addAll(boxes);
 					}
+				}
+				if(beeBoxes!=null && beeBoxes.size()>0) {
+					Collections.sort(beeBoxes);
 				}
 				return Response.success(beeBoxes);
 			case ORGANIZATION_ADMIN:
@@ -132,10 +138,13 @@ public class BeeBoxGroupController {
 				}
 				for (FilterItem filter : request.getFilterItems()) {
 					filter.setBeeFarmerIds(beeFarmerIds);
-					List<BeeBox> boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
 					if (boxes != null && boxes.size() >= 0) {
 						beeBoxes.addAll(boxes);
 					}
+				}
+				if(beeBoxes!=null && beeBoxes.size()>0) {
+					Collections.sort(beeBoxes);
 				}
 				return Response.success(beeBoxes);
 			case NO_ORGANIZATION_ADMIN:
@@ -145,10 +154,13 @@ public class BeeBoxGroupController {
 				}
 				for (FilterItem filter : request.getFilterItems()) {
 					filter.setBeeFarmerIds(beeFarmerIds);
-					List<BeeBox> boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
 					if (boxes != null && boxes.size() >= 0) {
 						beeBoxes.addAll(boxes);
 					}
+				}
+				if(beeBoxes!=null && beeBoxes.size()>0) {
+					Collections.sort(beeBoxes);
 				}
 				return Response.success(beeBoxes);
 			}

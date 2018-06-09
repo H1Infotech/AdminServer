@@ -12,6 +12,7 @@ public class AdminAlterationRequest {
 	private Long id;
 	private String name;
 	private String username;
+	private String password;
 	private String mobile;
 	private Date createDate;
 	private Date updateDate;
@@ -20,7 +21,24 @@ public class AdminAlterationRequest {
 	private String email;
 	private Integer type;
 	private String address;
+	private String code;
 	private List<Integer> rights;
+	
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
 
 	public Long getId() {
 		return id;
@@ -126,6 +144,7 @@ public class AdminAlterationRequest {
 		admin.setMobile(mobile); 
 		admin.setCreateDate(new Date()); 
 		admin.setUpdateDate(new Date());
+		admin.setPassword(password);
 		admin.setStatus(status);
 		admin.setOrganizationId(organizationId); 
 		admin.setEmail(email); 
