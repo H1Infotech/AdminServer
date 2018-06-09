@@ -91,6 +91,19 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 	}
 	
 	@Override
+	public List<BeeFarmer> getBeeFarmers(List<Long> ids) {
+		if(ids==null) {
+			return null;
+		}
+		return assembleBeeFarmer((List<BeeFarmer>)beeFarmerRepository.findByOrganizationIdIn(ids));
+	}
+	
+	@Override
+	public List<BeeFarmer> getAllBeeFarmers() {
+		return assembleBeeFarmer((List<BeeFarmer>)beeFarmerRepository.findAll());
+	}
+	
+	@Override
 	public List<Long> getBeeFarmerIdsWithoutOrganization() {
 		List<BeeFarmer> beeFarmers =  beeFarmerRepository.findByOrganizationIdIsNull();
 		if(beeFarmers==null || beeFarmers.size()==0) {
@@ -120,6 +133,12 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 			response.setTotalPageNo(0);
 		}
 		return response;
+	}
+	
+	
+	@Override
+	public List<BeeFarmer> getBeeFarmersWithoutOrganization() {
+		return assembleBeeFarmer(beeFarmerRepository.findByOrganizationIdIsNull());
 	}
 
 	private List<BeeFarmer> assembleBeeFarmer(List<BeeFarmer> beeFarmers) {

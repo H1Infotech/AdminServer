@@ -1,6 +1,9 @@
 package com.h1infotech.smarthive.domain;
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
+
 import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,7 +30,13 @@ public class BeeFarmer {
 	@Transient
 	private String OrganizationName;
 
-	
+	public String getDesc() {
+		DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
+		return id+"_"+name+"_"+username
+				 +"_"+address+"_"+mobile
+				 +"_"+OrganizationName+"_"+email
+				 +"_"+df3.format(createDate)+df3.format(updateDate);
+	}
 	
 	public Integer getBeeBoxNum() {
 		return beeBoxNum;

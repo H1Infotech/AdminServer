@@ -14,8 +14,11 @@ public interface BeeFarmerService {
 	BeeFarmerPageRetrievalResponse getBeeFarmers(int pageNo, int pageSize);
 	BeeFarmerPageRetrievalResponse getBeeFarmers(List<Long> ids, int pageNo, int pageSize);
 	List<Long> getBeeFarmerIdsWithoutOrganization();
+	List<BeeFarmer> getBeeFarmersWithoutOrganization();
+	List<BeeFarmer> getBeeFarmers(List<Long> ids);
 	BeeFarmerPageRetrievalResponse getBeeFarmersWithoutOrganization(int pageNo, int pageSize);
 
+	List<BeeFarmer> getAllBeeFarmers();
 //	List<Organization> getOrganization();
 //	List<Organization> getOrganization(long adminId);
 	void delete(List<Long> ids);

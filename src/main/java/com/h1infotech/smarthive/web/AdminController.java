@@ -2,6 +2,8 @@ package com.h1infotech.smarthive.web;
 
 import java.util.List;
 import org.slf4j.Logger;
+
+import java.util.Iterator;
 import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
@@ -209,9 +211,12 @@ public class AdminController {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
 		List<Admin> admins = adminService.getAdmins(admin.getId());
-		for(Admin one: admins) {
-			if(one.getDesc().indexOf(request.getKeyword()) == -1) {
-				admins.remove(one);
+		if(admins==null || admins.size()==0) {
+			Iterator<Admin> iterator = admins.iterator();
+			while(iterator.hasNext()) {
+				if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {
+					iterator.remove();
+				}
 			}
 		}
 		return Response.success(admins);

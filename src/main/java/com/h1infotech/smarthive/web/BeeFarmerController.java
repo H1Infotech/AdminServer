@@ -1,5 +1,6 @@
 package com.h1infotech.smarthive.web;
 
+import java.util.Iterator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.web.request.BeeFarmerDeletionRequest;
+import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.BeeFarmerAddAndUpdateRequest;
 import com.h1infotech.smarthive.web.request.BeeFarmerPageRetrievalRequest;
 import com.h1infotech.smarthive.web.request.OrganizationBeeFarmerRetrievalRequst;
@@ -205,4 +207,49 @@ public class BeeFarmerController {
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 	}
+	
+	@PostMapping(path = "/searchBeeFarmer")
+	@ResponseBody
+	public Response<List<BeeFarmer>> searchBeeFarmer(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
+		try {
+    		logger.info("====Catching the Request for Search Bee Farmers: {}====",JSONObject.toJSONString(request));
+    		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+    		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+    		if(admin==null) {
+    			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    		}
+    		if(request==null) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
+    		List<BeeFarmer> beeFarmers = null;
+    		switch(AdminTypeEnum.getEnum(admin.getType())) {
+    			case SUPER_ADMIN:
+    			case SENIOR_ADMIN:
+    				beeFarmers = beeFarmerService.getAllBeeFarmers();
+    				break;
+    			case ORGANIZATION_ADMIN:
+    				List<Long> ids = organizationService.getIdsByAdminId(admin.getId());
+    				beeFarmers = beeFarmerService.getBeeFarmers(ids);
+    				break;
+    			case NO_ORGANIZATION_ADMIN:
+    				beeFarmers = beeFarmerService.getBeeFarmersWithoutOrganization();
+    				break;
+    			}
+    			if(beeFarmers!=null && beeFarmers.size()>0) {
+    				Iterator<BeeFarmer> iterator = beeFarmers.iterator();
+    				while(iterator.hasNext()) {
+    					if(iterator.next().getDesc().indexOf(request.getKeyword())==-1){
+    						iterator.remove();
+    					}
+    				}
+    			}
+    			return Response.success(beeFarmers);
+    		} catch(BusinessException e) {
+    			logger.error("====Get Page Organization Error====", e);
+    			return Response.fail(e.getCode(),e.getMessage());
+    		} catch(Exception e) {
+    			logger.error("====Get Page Organization Error====", e);
+    			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    		}
+		}
 }
