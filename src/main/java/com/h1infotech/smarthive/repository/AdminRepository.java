@@ -18,7 +18,6 @@ public interface AdminRepository extends PagingAndSortingRepository<Admin, Long>
 
 	List<Admin> findByTypeNotAndIdNot(Integer type, long excludeId);
 
-	
 	List<Admin> findByTypeIn(List<Integer> types);
 	
 	@Query(value = "update admin set password= :password where username= :username", nativeQuery = true)

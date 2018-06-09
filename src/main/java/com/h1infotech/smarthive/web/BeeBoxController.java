@@ -395,7 +395,7 @@ public class BeeBoxController {
     @ResponseBody
     public Response<List<IntervalSensorData>> getChartSensorData(HttpServletRequest httpRequest, @RequestBody ChartSensoeDataRequest request) {
     	try {
-    	logger.info("====Catching the Request for Getting Chart Sensor Data(token: {}), requst: {}====", httpRequest.getHeader("token"), JSONObject.toJSON(request));
+    	logger.info("====Catching the Request for Getting Chart Sensor Data(token: {}), requst: {}====", httpRequest.getHeader("token"), JSONObject.toJSONString(request));
 		if(request==null 
 				|| request.getBeginDate()==null
 				|| request.getEndDate()==null
@@ -416,7 +416,7 @@ public class BeeBoxController {
     @ResponseBody
     public Response<String> alterBeeBox(HttpServletRequest httpRequest, @RequestBody BeeBoxAddRequest request) {
     	try {
-        	logger.info("====Catching the Request for Getting Chart Sensor Data(token: {}), requst: {}====", httpRequest.getHeader("token"), JSONObject.toJSON(request));
+        	logger.info("====Catching the Request for Getting Chart Sensor Data(token: {}), requst: {}====", httpRequest.getHeader("token"), JSONObject.toJSONString(request));
         	if(request==null) {
         		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
         	}
