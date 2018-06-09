@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.persistence.Id;
@@ -47,6 +48,22 @@ public class BeeBox {
 	private Long latestSensorDataId;
 	private Boolean protectionStrategy;
 	private Date updateSensorDataTime;
+	
+	public String getDesc() {
+    	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
+    	String desc = id+"_"+farmerId+"_"+batchNo
+    			 +"_"+lat+"_"+lng+"_"+df3.format(entryDate)+"_"+manufacturer
+    			 +"_"+df3.format(productionDate)+latestSensorDataId
+    			 +"_"+df3.format(updateSensorDataTime);
+    	if(status==0) {
+    		desc+="正常";
+    	}else if(status==2) {
+    		desc+="异常";
+    	}else if(status==3) {
+    		desc+="离线";
+    	}
+    	return desc;
+	}
 	
 	@Autowired
 	private static BeeFarmerRepository beeFarmerRepository;

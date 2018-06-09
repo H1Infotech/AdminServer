@@ -20,6 +20,10 @@ public class Organization {
     private String contactPhone;
     private String organizationName;
     
+    public String getDesc() {
+    	return id+"_"+email+"_"+address+"_"+contactName+"_"+contactPhone+"_"+organizationName;
+    }
+    
     public Long getAdminId() {
 		return adminId;
 	}

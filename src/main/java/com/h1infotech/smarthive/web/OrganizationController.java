@@ -2,8 +2,10 @@ package com.h1infotech.smarthive.web;
 
 import java.util.List;
 import org.slf4j.Logger;
+import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.Admin;
 import com.h1infotech.smarthive.common.Response;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.OrganizationAddUpdateRequest;
 import com.h1infotech.smarthive.web.request.OrganizationDeletionRequest;
 import com.h1infotech.smarthive.web.request.OrganizationPageRetrievalRequest;
@@ -184,6 +187,48 @@ public class OrganizationController {
 			return Response.fail(e.getCode(), e.getMessage());
 		} catch (Exception e) {
 			logger.error("====Add | Update Organization Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+	
+	@PostMapping(path = "/searchOrganization")
+	@ResponseBody
+	public Response<List<Organization>> searchOrganization(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
+		try {
+			logger.info("====Catching the Request for Getting Paged Organizations====");
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			List<Organization> organizations = null;
+			switch(AdminTypeEnum.getEnum(admin.getType())) {
+    		case SUPER_ADMIN:
+    		case SENIOR_ADMIN:
+    			organizations = organizationService.getOrganization();
+    			break;
+    		case ORGANIZATION_ADMIN:
+    			organizations = organizationService.getOrganization(admin.getId());
+    			break;
+    		case NO_ORGANIZATION_ADMIN:
+    			break;
+    		}
+			if(StringUtils.isEmpty(request.getKeyword())) {
+    			if(organizations==null || organizations.size()==0) {
+    				Iterator<Organization> iterator = organizations.iterator();
+    				while(iterator.hasNext()) {
+    					if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {
+    						iterator.remove();
+    					}
+    				}
+    			}
+    		}
+			return Response.success(organizations);
+		} catch (BusinessException e) {
+			logger.error("====Get Organization Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Get Organization Error====", e);
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 	}

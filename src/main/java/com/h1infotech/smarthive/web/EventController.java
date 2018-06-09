@@ -16,10 +16,9 @@ import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.service.EventService;
 import com.h1infotech.smarthive.common.BusinessException;
+import org.springframework.web.bind.annotation.GetMapping;
 import com.h1infotech.smarthive.repository.AdminRepository;
 import com.h1infotech.smarthive.repository.EventRepository;
-
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;

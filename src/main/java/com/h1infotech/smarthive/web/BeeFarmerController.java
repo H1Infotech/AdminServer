@@ -1,7 +1,10 @@
 package com.h1infotech.smarthive.web;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
@@ -210,7 +213,7 @@ public class BeeFarmerController {
 	
 	@PostMapping(path = "/searchBeeFarmer")
 	@ResponseBody
-	public Response<List<BeeFarmer>> searchBeeFarmer(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
+	public Response<Object> searchBeeFarmer(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
 		try {
     		logger.info("====Catching the Request for Search Bee Farmers: {}====",JSONObject.toJSONString(request));
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
@@ -243,7 +246,23 @@ public class BeeFarmerController {
     					}
     				}
     			}
-    			return Response.success(beeFarmers);
+    			
+    			int startIndex = (request.getPageNo()-1) * request.getPageSize();
+    			int endIndex = (request.getPageNo()) * request.getPageSize();
+    			if(endIndex > beeFarmers.size()) {
+    				endIndex = beeFarmers.size();
+    			}
+    			if(startIndex>=beeFarmers.size()) {
+    				Map<String,Integer> res = new HashMap<String, Integer>();
+    				res.put("totalPageNo", request.getPageNo());
+    				res.put("currentPageNo", request.getPageSize());
+    				return Response.success(res);
+    			}
+    			Map<String,Object> res = new HashMap<String, Object>();
+    			res.put("totalPageNo", request.getPageNo());
+    			res.put("currentPageNo", request.getPageSize());
+    			res.put("data", beeFarmers);
+    			return Response.success(res);
     		} catch(BusinessException e) {
     			logger.error("====Get Page Organization Error====", e);
     			return Response.fail(e.getCode(),e.getMessage());

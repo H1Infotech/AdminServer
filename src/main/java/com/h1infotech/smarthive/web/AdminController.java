@@ -1,8 +1,11 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
@@ -200,7 +203,7 @@ public class AdminController {
 	
 	@PostMapping(path = "/searchAdmin")
 	@ResponseBody
-	public Response<List<Admin>> searchAdmin(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
+	public Response<Object> searchAdmin(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
 		logger.info("====Catching the Request for Getting All Organization Admins====");
 		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
@@ -219,6 +222,22 @@ public class AdminController {
 				}
 			}
 		}
-		return Response.success(admins);
+		
+		int startIndex = (request.getPageNo()-1) * request.getPageSize();
+		int endIndex = (request.getPageNo()) * request.getPageSize();
+		if(endIndex>admins.size()) {
+			endIndex=admins.size();
+		}
+		if(startIndex>=admins.size()) {
+			Map<String,Integer> res = new HashMap<String, Integer>();
+			res.put("totalPageNo", request.getPageNo());
+			res.put("currentPageNo", request.getPageSize());
+			return Response.success(res);
+		}
+		Map<String,Object> res = new HashMap<String, Object>();
+		res.put("totalPageNo", request.getPageNo());
+		res.put("currentPageNo", request.getPageSize());
+		res.put("data", admins);
+		return Response.success(res);
 	}
 }
