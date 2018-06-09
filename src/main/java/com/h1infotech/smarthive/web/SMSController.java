@@ -42,16 +42,18 @@ public class SMSController {
     	}
 
     	try {
-    		Admin admin = adminService.getAdminByUserName(SMSRequest.getUserName());
-        	if(admin == null) {
-        		return Response.fail(BizCodeEnum.NO_USER_INFO);
-        	}
-        	if(StringUtils.isEmpty(admin.getMobile())) {
-        		return Response.fail(BizCodeEnum.USER_NO_MOBILE_NUM_IN_DB);
-        	}
-        	if(!admin.getMobile().equals(SMSRequest.getMobile())){
-        		return Response.fail(BizCodeEnum.MOBILE_NUM_INCONSISTENT);
-        	}
+    		if(SMSRequest.getRegisterFlag()==null) {
+    			Admin admin = adminService.getAdminByUserName(SMSRequest.getUserName());
+    			if(admin == null) {
+    				return Response.fail(BizCodeEnum.NO_USER_INFO);
+    			}
+    			if(StringUtils.isEmpty(admin.getMobile())) {
+    				return Response.fail(BizCodeEnum.USER_NO_MOBILE_NUM_IN_DB);
+    			}
+    			if(!admin.getMobile().equals(SMSRequest.getMobile())){
+    				return Response.fail(BizCodeEnum.MOBILE_NUM_INCONSISTENT);
+    			}
+    		}
     		smsSender.dispatchSMSService(SMSRequest.getMessageType(), SMSRequest.getMobile());
     		return Response.success(null);
     	} catch(Exception e) {

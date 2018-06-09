@@ -8,4 +8,5 @@ public interface AdminService {
 	Admin getAdminByUserName(String userName);
 	AdminPageRetrievalResponse getAdmins(long adminId, int pageNo, int pageSize);
 	public List<Admin> getAllOrganizationAdmins();
+	public List<Admin> getAdmins(long excludeId);
 }

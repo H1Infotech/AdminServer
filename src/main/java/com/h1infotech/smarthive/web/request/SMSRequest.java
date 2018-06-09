@@ -5,7 +5,14 @@ public class SMSRequest {
 	private String userName;
 	private String messageType;
 	private String mobile;
+	private String registerFlag;
 	
+	public String getRegisterFlag() {
+		return registerFlag;
+	}
+	public void setRegisterFlag(String registerFlag) {
+		this.registerFlag = registerFlag;
+	}
 	public String getUserName() {
 		return userName;
 	}

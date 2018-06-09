@@ -1,5 +1,6 @@
 package com.h1infotech.smarthive.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.domain.SensorData;
@@ -22,6 +23,10 @@ public class SensorDataServiceImpl implements SensorDataService {
 			return sensorData.get();
 		}
 		return null;
+	}
+	
+	public List<SensorData> getSensorDara(List<Long> ids) {
+		return sensorDataRepository.findByIdIn(ids);
 	}
 	
 }

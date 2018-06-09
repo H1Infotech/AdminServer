@@ -2,7 +2,9 @@ package com.h1infotech.smarthive.domain;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.util.Collection;
 import javax.persistence.Id;
 import java.util.stream.Stream;
@@ -43,6 +45,23 @@ public class Admin implements Serializable, UserDetails {
     private String organizationName;
     @Transient
     private List<Integer> rights;
+    
+    public String getDesc() {
+    	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
+    	
+    	String desc = id+"_"+name+"_"+username
+    			        +"_"+mobile+"_"+df3.format(createDate)
+    			        +"_"+df3.format(updateDate)+"_"+organizationName
+    			        +"_"+email+"_"+address+"_";
+    	if(type==2) {
+    		desc+="高级管理员";
+    	}else if(type==3) {
+    		desc+="组织管理员";
+    	}else if(type==4) {
+    		desc+="无组织管理员";
+    	}
+    	return desc;
+    }
     
 	public String getOrganizationName() {
 		return organizationName;

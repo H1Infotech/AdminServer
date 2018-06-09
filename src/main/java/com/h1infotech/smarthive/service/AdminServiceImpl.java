@@ -1,11 +1,14 @@
 package com.h1infotech.smarthive.service;
 
-import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import com.h1infotech.smarthive.domain.Admin;
+import com.h1infotech.smarthive.domain.Organization;
+
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import com.h1infotech.smarthive.common.BizCodeEnum;
@@ -14,6 +17,7 @@ import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.repository.OrganizationRepository;
 import com.h1infotech.smarthive.web.response.AdminPageRetrievalResponse;
 
 @Service
@@ -21,6 +25,9 @@ public class AdminServiceImpl implements AdminService {
 	
 	@Autowired
 	AdminRepository adminRepository;
+	
+	@Autowired
+	OrganizationRepository organizationRepository;
 	
 	@Override
 	public Admin getAdminByUserName(String userName) {
@@ -42,7 +49,24 @@ public class AdminServiceImpl implements AdminService {
 		Pageable page = PageRequest.of(pageNo-1, pageSize);
 		Page<Admin> pageAdmin = adminRepository.findByTypeNotAndIdNot(AdminTypeEnum.SUPER_ADMIN.getType(), excludeId, page);
 		AdminPageRetrievalResponse response = new AdminPageRetrievalResponse();
-		if(pageAdmin.getContent()!=null) {
+		if(pageAdmin.getContent()!=null && pageAdmin.getContent().size()>0) {
+			List<Long> organizationIds = new LinkedList<Long>();
+			for(Admin admin: pageAdmin.getContent()) {
+				organizationIds.add(admin.getOrganizationId());
+			}
+			List<Organization> organizations = organizationRepository.findByIdIn(organizationIds);
+			Map<Long, Organization> map = new HashMap<Long, Organization>();
+			if(organizations!=null && organizations.size()>0) {
+				for(Organization organization: organizations) {
+					map.put(organization.getId(), organization);
+				}
+			}
+			for(Admin admin: pageAdmin.getContent()) {
+				Organization organization = map.get(admin.getOrganizationId());
+				if(organization!=null && StringUtils.isEmpty(organization.getOrganizationName())) {
+					admin.setOrganizationName(organization.getOrganizationName());
+				}
+			}
 			response.setCurrentPageNo(pageNo);
 			response.setTotalPageNo(pageAdmin.getTotalPages());
 			response.setAdmins(pageAdmin.getContent());
@@ -51,6 +75,31 @@ public class AdminServiceImpl implements AdminService {
 			response.setTotalPageNo(0);
 		}
 		return response;
+	}
+	
+	@Override
+	public List<Admin> getAdmins(long excludeId) {
+		List<Admin> admins = adminRepository.findByTypeNotAndIdNot(AdminTypeEnum.SUPER_ADMIN.getType(), excludeId);
+		if(admins!=null && admins.size()>0) {
+			List<Long> organizationIds = new LinkedList<Long>();
+			for(Admin admin: admins) {
+				organizationIds.add(admin.getOrganizationId());
+			}
+			List<Organization> organizations = organizationRepository.findByIdIn(organizationIds);
+			Map<Long, Organization> map = new HashMap<Long, Organization>();
+			if(organizations!=null && organizations.size()>0) {
+				for(Organization organization: organizations) {
+					map.put(organization.getId(), organization);
+				}
+			}
+			for(Admin admin: admins) {
+				Organization organization = map.get(admin.getOrganizationId());
+				if(organization!=null && StringUtils.isEmpty(organization.getOrganizationName())) {
+					admin.setOrganizationName(organization.getOrganizationName());
+				}
+			}
+		}
+		return admins;
 	}
 	
 	@Override

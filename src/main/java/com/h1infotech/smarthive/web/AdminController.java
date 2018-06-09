@@ -1,17 +1,17 @@
 package com.h1infotech.smarthive.web;
 
-import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
+import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.Admin;
-import com.h1infotech.smarthive.domain.AdminRight;
-import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.MyUtils;
 import com.h1infotech.smarthive.common.Response;
+import com.h1infotech.smarthive.domain.AdminRight;
+import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.service.AdminService;
@@ -21,19 +21,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.AdminRepository;
-import com.h1infotech.smarthive.repository.AdminRightRepository;
-import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
-import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
-
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.h1infotech.smarthive.repository.AdminRightRepository;
 import com.h1infotech.smarthive.web.request.AdminDeletionRequest;
+import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
+import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.AdminAlterationRequest;
 import com.h1infotech.smarthive.web.request.AdminPageRetrievalRequest;
 import com.h1infotech.smarthive.web.response.AdminPageRetrievalResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -194,5 +194,26 @@ public class AdminController {
 			logger.error("====Add | Update Admin Error====", e);
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
+	}
+	
+	@PostMapping(path = "/searchAdmin")
+	@ResponseBody
+	public Response<List<Admin>> searchAdmin(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
+		logger.info("====Catching the Request for Getting All Organization Admins====");
+		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+		if(admin==null) {
+			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+		}
+		if(StringUtils.isEmpty(request.getKeyword())) {
+			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+		}
+		List<Admin> admins = adminService.getAdmins(admin.getId());
+		for(Admin one: admins) {
+			if(one.getDesc().indexOf(request.getKeyword()) == -1) {
+				admins.remove(one);
+			}
+		}
+		return Response.success(admins);
 	}
 }

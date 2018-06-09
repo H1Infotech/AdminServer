@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.BeeBoxRepository;
 import com.h1infotech.smarthive.service.OrganizationService;
+import com.h1infotech.smarthive.service.SensorDataService;
+
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.h1infotech.smarthive.web.request.BeeBoxAddRequest;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +53,9 @@ public class BeeBoxController {
     @Autowired
     JwtTokenUtil jwtTokenUtil;
 	
+    @Autowired
+    SensorDataService sensorDataService;
+    
 	@Autowired
 	BeeBoxService beeBoxService;
 	
@@ -69,6 +74,53 @@ public class BeeBoxController {
 	@Autowired
 	IntervalSensorDataService intervalSensorDataService;
 	
+    @GetMapping(path = "/getAllBeeBoxSensorData")
+    @ResponseBody
+    public Response<List<SensorData>> getAllBeeBoxSensorData(HttpServletRequest request) {
+    	try {
+    		if(request == null) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
+    		logger.info("====Catching the Request for Getting beeBox: {}====");
+    		Admin admin = jwtTokenUtil.getAdmin(request.getHeader("token"));
+    		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+    		if(admin==null) {
+    			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    		}
+    		List<Long> beeFarmerIds = null;
+    		List<Long> organizationIds = null;
+    		List<BeeBox> beeBoxes = null;
+    		switch(AdminTypeEnum.getEnum(admin.getType())) {
+    		case SUPER_ADMIN:
+    		case SENIOR_ADMIN:
+    			beeBoxes = beeBoxService.getAllBeeBoxes();
+    		case ORGANIZATION_ADMIN:
+    			organizationIds = organizationService.getIdsByAdminId(admin.getId());
+    			beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
+    			beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+    		case NO_ORGANIZATION_ADMIN:
+    			beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
+    			beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+    		}
+    		if(beeBoxes==null || beeBoxes.size()==0) {
+    			return Response.success(null);
+    		}
+    		List<Long> ids = new LinkedList<Long>();
+    		for(BeeBox beeBox: beeBoxes) {
+    			ids.add(beeBox.getId());
+    		}
+    		return Response.success(sensorDataService.getSensorDara(ids));
+    	}catch(BusinessException e) {
+    		logger.error(e.getMessage(), e);
+    		return Response.fail(e.getCode(), e.getMessage());
+    	}catch(Exception e) {
+    		logger.error("Get BeeBox Info Error",e);
+    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    	}
+    }
+    
+    
+    
     @GetMapping(path = "/getBeeBoxes")
     @ResponseBody
     public Response<List<BeeBox>> getBeeBoxes(HttpServletRequest request) {
@@ -105,7 +157,6 @@ public class BeeBoxController {
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
-    
     
     @PostMapping(path = "/getPagedBeeBoxes")
     @ResponseBody
