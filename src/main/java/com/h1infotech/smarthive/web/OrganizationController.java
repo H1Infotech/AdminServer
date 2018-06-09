@@ -14,6 +14,8 @@ import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.AdminRightEnum;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.service.BeeFarmerService;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,7 +80,7 @@ public class OrganizationController {
     	}
 	}
     
-	@PostMapping(path = "/getAllOrganizations")
+	@GetMapping(path = "/getAllOrganizations")
 	@ResponseBody
 	public Response<List<Organization>> getAllOrganizations(HttpServletRequest httpRequest) {
 		try {
