@@ -62,7 +62,7 @@ public class BeeBox  implements Comparable<BeeBox> {
 	@JsonIgnore
 	public String getDesc() {
     	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
-    	String desc = id+"_"+farmerId+"_"+batchNo
+    	String desc = id+"_"+farmerId+"_"+batchNo+"_"+beeBoxNo
     			 +"_"+lat+"_"+lng+"_"+manufacturer
     			 +"_"+latestSensorDataId+"_";
     	if(entryDate!=null) {

@@ -16,7 +16,12 @@ public class MyUtils {
 		StringBuffer sb = new StringBuffer();
         for(int i = 0; i<pinYinStr.length(); i++) {
             try {
-				tempStr = PinyinHelper.toHanyuPinyinStringArray(pinYinStr.charAt(i), format)[0];
+            	String[] temp = PinyinHelper.toHanyuPinyinStringArray(pinYinStr.charAt(i), format);
+				if(temp==null) {
+					tempStr=""+pinYinStr.charAt(i);
+				}else {
+					tempStr = temp[0];
+				}
 			} catch (BadHanyuPinyinOutputFormatCombination e) {
 				e.printStackTrace();
 			}
@@ -37,5 +42,10 @@ public class MyUtils {
 			ranmdNum = "0"+ranmdNum;
 		}
 		return name+ranmdNum;
+	}
+	
+	public static void main(String[] args) {
+		String name = getUserName("ceshi");
+		System.out.println(name);
 	}
 }

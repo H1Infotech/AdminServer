@@ -20,8 +20,8 @@ import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.domain.Organization;
 import com.h1infotech.smarthive.service.AdminService;
-import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
+import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.BusinessException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import com.h1infotech.smarthive.repository.AdminRightRepository;
 import com.h1infotech.smarthive.web.request.AdminDeletionRequest;
 import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
@@ -209,8 +209,11 @@ public class AdminController {
 				alterAdmin = request.getAdmin();
 				alterAdmin.setUsername(userName);
 				alterAdmin.setPassword(bCryptPasswordEncoder.encode(alterAdmin.getPassword()));
+				Admin savedAdmin = adminRepository.save(alterAdmin);
 				if(request.getAdminRight()!=null && request.getAdminRight().size()>0) {
 					for(AdminRight adminRight: request.getAdminRight()) {
+						adminRight.setAdminId(savedAdmin.getId());
+						adminRight.setCreatedBy(admin.getId());
 						adminRightRepository.save(adminRight);
 					}
 				}
@@ -225,6 +228,7 @@ public class AdminController {
 				}else {
 					alterAdmin.setPassword(bCryptPasswordEncoder.encode(alterAdmin.getPassword()));
 				}
+				
 				alterAdmin.setUpdateDate(adminDB.getUpdateDate());
 				adminRightRepository.deleteByAdminId(alterAdmin.getId());
 				if(request.getAdminRight()!=null && request.getAdminRight().size()>0) {
@@ -280,7 +284,7 @@ public class AdminController {
 		Map<String,Object> res = new HashMap<String, Object>();
 		res.put("totalPageNo", request.getPageNo());
 		res.put("currentPageNo", request.getPageSize());
-		res.put("data", admins);
+		res.put("admins", admins);
 		return Response.success(res);
 	}
 }
