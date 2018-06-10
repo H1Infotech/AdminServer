@@ -9,5 +9,5 @@ public interface SensorDataRepository extends JpaRepository<SensorData, Long>{
 	
 	List<SensorData> findByIdIn(List<Long> ids);
 
-	List<SensorData> findByFarmerIdAndBoxIdAndIdGreaterThan(Long farmerId, Long boxId, Long id);
+	List<SensorData> findByFarmerIdAndBeeBoxNoAndIdGreaterThan(Long farmerId, String boxId, Long id);
 }

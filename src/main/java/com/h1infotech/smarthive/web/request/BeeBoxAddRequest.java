@@ -8,6 +8,7 @@ public class BeeBoxAddRequest {
 
 	private Long id;
 	private Long farmerId;
+	private String beeBoxNo;
 	private String manufacturer;
 	private Date productionDate;
 	private String batchNo;
@@ -22,6 +23,7 @@ public class BeeBoxAddRequest {
 	public BeeBox getBeeBoxAdd() {
 		BeeBox beeBox = new BeeBox();
 		beeBox.setFarmerId(farmerId);
+		beeBox.setBeeBoxNo(beeBoxNo);
 		beeBox.setManufacturer(manufacturer);
 		beeBox.setProductionDate(productionDate);
 		beeBox.setBatchNo(batchNo);
@@ -33,6 +35,7 @@ public class BeeBoxAddRequest {
 	public BeeBox getBeeBoxUpdate() {
 		BeeBox beeBox = new BeeBox();
 		beeBox.setId(id);
+		beeBox.setBeeBoxNo(beeBoxNo);
 		beeBox.setFarmerId(farmerId);
 		beeBox.setManufacturer(manufacturer);
 		beeBox.setProductionDate(productionDate);
@@ -40,6 +43,14 @@ public class BeeBoxAddRequest {
 		return beeBox;
 	}
 	
+	public String getBeeBoxNo() {
+		return beeBoxNo;
+	}
+
+	public void setBeeBoxNo(String beeBoxNo) {
+		this.beeBoxNo = beeBoxNo;
+	}
+
 	public Long getId() {
 		return id;
 	}

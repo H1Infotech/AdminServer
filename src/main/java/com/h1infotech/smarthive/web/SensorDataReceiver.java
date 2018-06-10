@@ -101,13 +101,13 @@ public class SensorDataReceiver {
 			for(Event event: events) {
 				boolean normalStatus = sensorDataEvaluationService.evaluate(event.getAction(), sensorData);
 				if(!normalStatus) {
-					Optional<BeeBox> beeBoxDB = beeBoxRepository.findById(sensorData.getBoxId());
-					if(beeBoxDB.isPresent()) {
-						Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(beeBoxDB.get().getFarmerId());
+					BeeBox beeBoxDB = beeBoxRepository.findByBeeBoxNo(sensorData.getBeeBoxNo());
+					if(beeBoxDB!=null) {
+						Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(beeBoxDB.getFarmerId());
 						if(beeFarmer.isPresent() && !StringUtils.isEmpty(beeFarmer.get().getMobile())) {
 							KV[] kvs = new KV[4];
 							kvs[0] = new KV("name", beeFarmer.get().getName());
-							kvs[1] = new KV("boxNo", ""+beeBoxDB.get().getId());
+							kvs[1] = new KV("boxNo", ""+beeBoxDB.getId());
 							String dataType = null;
 							String value = null;
 							if(1 == event.getRuleType()) {
@@ -128,7 +128,7 @@ public class SensorDataReceiver {
 							}
 							kvs[2] = new KV("dataType",dataType);
 							kvs[3] = new KV("value", value);
-							String desc = "蜂箱: "+beeBoxDB.get().getId()+", "+dataType+"异常: "+value;
+							String desc = "蜂箱: "+beeBoxDB.getId()+", "+dataType+"异常: "+value;
 							HistoryAlertEvent newEvent = new HistoryAlertEvent();
 							newEvent.setAdminId(event.getAdminId());
 							newEvent.setCreateDate(new Date());

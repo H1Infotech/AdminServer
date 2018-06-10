@@ -14,7 +14,7 @@ public class SensorData implements Comparable<SensorData> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Long boxId;
+	private String beeBoxNo;
 	private Long farmerId;
 	private BigDecimal lat;
 	private BigDecimal lng;
@@ -44,11 +44,11 @@ public class SensorData implements Comparable<SensorData> {
 	public void setFarmerId(Long farmerId) {
 		this.farmerId = farmerId;
 	}
-	public Long getBoxId() {
-		return boxId;
+	public String getBeeBoxNo() {
+		return beeBoxNo;
 	}
-	public void setBoxId(Long boxId) {
-		this.boxId = boxId;
+	public void setBeeBoxNo(String beeBoxNo) {
+		this.beeBoxNo = beeBoxNo;
 	}
 	public Date getCreateDate() {
 		return createDate;
@@ -101,19 +101,12 @@ public class SensorData implements Comparable<SensorData> {
 
 	@Override
 	public int compareTo(SensorData o) {
-		if(o==null || o.getBoxId()==null) {
+		if(o==null || o.getBeeBoxNo()==null) {
 			return 1;
 		}
-		if(this.boxId==null) {
+		if(this.getBeeBoxNo()==null) {
 			return -1;
 		}
-		long diff = this.boxId - o.getBoxId();
-		if(diff==0) {
-			return 0;
-		}else if(diff>0) {
-			return 1;
-		}else {
-			return -1;
-		}
+		return beeBoxNo.compareTo(o.getBeeBoxNo());
 	}
 }

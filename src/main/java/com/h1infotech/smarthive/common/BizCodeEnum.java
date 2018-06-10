@@ -18,6 +18,7 @@ public enum BizCodeEnum {
 	NO_SUCH_EVENT("000060","No such event"),
 	ILLEGAL_INPUT("000090","Illegal Input Parameter(s)"),
 	BEE_BOX_GROUP_EXISTS("000100","Group Name Already Exists"),
+	BEE_BOX_NUMBER_EXISTS("000110","BEE BOX NO EXISTS"),
 	SERVICE_ERROR("999999","Service Error"),
 	
 	

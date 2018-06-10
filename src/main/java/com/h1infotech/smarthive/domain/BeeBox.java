@@ -38,6 +38,7 @@ public class BeeBox  implements Comparable<BeeBox> {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+	private String beeBoxNo;
 	private Long farmerId;
 	private String batchNo;
 	private Integer status;
@@ -50,13 +51,32 @@ public class BeeBox  implements Comparable<BeeBox> {
 	private Boolean protectionStrategy;
 	private Date updateSensorDataTime;
 	
+	public String getBeeBoxNo() {
+		return beeBoxNo;
+	}
+
+	public void setBeeBoxNo(String beeBoxNo) {
+		this.beeBoxNo = beeBoxNo;
+	}
+
 	@JsonIgnore
 	public String getDesc() {
     	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
     	String desc = id+"_"+farmerId+"_"+batchNo
-    			 +"_"+lat+"_"+lng+"_"+entryDate==null?null:df3.format(entryDate)+"_"+manufacturer
-    			 +"_"+productionDate==null?null:df3.format(productionDate)+latestSensorDataId
-    			 +"_"+updateSensorDataTime==null?null:df3.format(updateSensorDataTime);
+    			 +"_"+lat+"_"+lng+"_"+manufacturer
+    			 +"_"+latestSensorDataId+"_";
+    	if(entryDate!=null) {
+    		desc += df3.format(entryDate)+"_";
+    	}
+    	if(productionDate!=null) {
+    		desc += df3.format(productionDate)+"_";
+    	}
+    	if(updateSensorDataTime!=null) {
+    		desc += df3.format(updateSensorDataTime)+"_";
+    	}
+    	if(status ==null) {
+    		status=0;
+    	}
     	if(status==0) {
     		desc+="正常";
     	}else if(status==2) {

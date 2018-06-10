@@ -3,13 +3,13 @@ package com.h1infotech.smarthive.web.request;
 import java.util.List;
 
 public class BeeBoxSensorDataRequest {
-	private List<Long> beeBoxIds;
+	private List<String> beeBoxNos;
 
-	public List<Long> getBeeBoxIds() {
-		return beeBoxIds;
+	public List<String> getBeeBoxNos() {
+		return beeBoxNos;
 	}
 
-	public void setBeeBoxIds(List<Long> beeBoxIds) {
-		this.beeBoxIds = beeBoxIds;
+	public void setBeeBoxNos(List<String> beeBoxNos) {
+		this.beeBoxNos = beeBoxNos;
 	}
 }

@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import com.h1infotech.smarthive.domain.SensorData;
 
 public class RecevierSensorDataRequest {
-	private Long boxId;
+	private String beeBoxNo;
 	private Long farmerId;
 	private BigDecimal lat;
 	private BigDecimal lng;
@@ -17,7 +17,7 @@ public class RecevierSensorDataRequest {
 
 	public SensorData getSensorData() {
 		SensorData sensorData = new SensorData();
-		sensorData.setBoxId(boxId);
+		sensorData.setBeeBoxNo(beeBoxNo);
 		sensorData.setFarmerId(farmerId);
 		sensorData.setLat(lat);
 		sensorData.setLng(lng);
@@ -30,13 +30,13 @@ public class RecevierSensorDataRequest {
 		sensorData.setStatus(1);
 		return sensorData;
 	}
-	
-	public Long getBoxId() {
-		return boxId;
+
+	public String getBeeBoxNo() {
+		return beeBoxNo;
 	}
 
-	public void setBoxId(Long boxId) {
-		this.boxId = boxId;
+	public void setBeeBoxNo(String beeBoxNo) {
+		this.beeBoxNo = beeBoxNo;
 	}
 
 	public Long getFarmerId() {

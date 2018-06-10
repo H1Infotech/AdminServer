@@ -33,9 +33,6 @@ public class BeeFarmer {
 	@JsonIgnore
 	public String getDesc() {
 		DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
-		System.err.println(createDate==null);
-		System.err.println(updateDate==null);
-
 		return id+"_"+name+"_"+username
 				 +"_"+address+"_"+mobile
 				 +"_"+OrganizationName+"_"+email

@@ -11,10 +11,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface BeeBoxRepository extends JpaRepository<BeeBox, Long>, JpaSpecificationExecutor<BeeBox> {
 	BeeBox findFirstByFarmerId(Long farmerId);
+	BeeBox findByBeeBoxNo(String beeBoxNo);
 	List<BeeBox> findBeeBoxesByFarmerId(Long farmerId);
 	List<BeeBox> findByFarmerIdIn(List<Long> ids);
 	List<BeeBox> findByFarmerIdIn(List<Long> ids, Sort sort);
 	List<BeeBox> findByIdIn(List<Long> ids);
+	List<BeeBox> findByBeeBoxNoIn(List<String> numbers);
 	Page<BeeBox> findByFarmerIdIn(List<Long> ids, Pageable page);
 	BeeBox findBeeBoxByIdAndFarmerId(Long id, Long farmerId);
 	@Transactional
