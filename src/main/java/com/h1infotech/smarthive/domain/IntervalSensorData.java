@@ -14,7 +14,7 @@ public class IntervalSensorData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private Long farmerId;
-	private Long boxId;
+	private String beeBoxNo;
 	private Date createDate;
 	private Double temperature;
 	private Double humidity;
@@ -49,12 +49,12 @@ public class IntervalSensorData {
 		this.farmerId = farmerId;
 	}
 
-	public Long getBoxId() {
-		return boxId;
+	public String getBeeBoxNo() {
+		return beeBoxNo;
 	}
 
-	public void setBoxId(Long boxId) {
-		this.boxId = boxId;
+	public void setBeeBoxNo(String beeBoxNo) {
+		this.beeBoxNo = beeBoxNo;
 	}
 
 	public Date getCreateDate() {

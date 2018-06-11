@@ -1,36 +1,32 @@
 package com.h1infotech.smarthive.domain;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
+import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import javax.persistence.Table;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
-
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
-import com.h1infotech.smarthive.web.request.FilterItem;
-
 import javax.persistence.Entity;
+import java.util.GregorianCalendar;
+import javax.persistence.criteria.Root;
+import com.alibaba.fastjson.JSONObject;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import org.apache.commons.lang3.StringUtils;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.h1infotech.smarthive.web.request.FilterItem;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 
 @Entity
 @Table(name = "beeBox")
@@ -120,18 +116,17 @@ public class BeeBox  implements Comparable<BeeBox> {
 					Expression<Long> exp = root.<Long>get("farmerId");
 					predicates.add(exp.in(filterItem.getBeeFarmerIds()));
 				}
-				if (filterItem.getId() != null) {
-					predicates.add(cb.equal(root.<Long>get("id"), filterItem.getId()));
+				if (!StringUtils.isEmpty(filterItem.getBatchNo())) {
+					predicates.add(cb.equal(root.<String>get("beeBoxNo"), filterItem.getBatchNo()));
 				}
-				if (filterItem.getMaxId() != null) {
-					predicates.add(cb.lessThan(root.<Long>get("id"), filterItem.getMaxId()));
+				if (!StringUtils.isEmpty(filterItem.getMaxBatchNo())) {
+					predicates.add(cb.lessThan(root.<String>get("beeBoxNo"), filterItem.getMaxBatchNo()));
 				}
-				if (filterItem.getMinId() != null) {
-					predicates.add(cb.greaterThan(root.<Long>get("id"), filterItem.getMinId()));
+				if (!StringUtils.isEmpty(filterItem.getMinBatchNo())) {
+					predicates.add(cb.greaterThan(root.<String>get("beeBoxNo"), filterItem.getMinBatchNo()));
 				}
 				if (!StringUtils.isEmpty(filterItem.getBeeFarmerName())) {
-					List<BeeFarmer> beeFarmers = beeFarmerRepository
-							.findByNameLike("%" + filterItem.getBeeFarmerName() + "%");
+					List<BeeFarmer> beeFarmers = beeFarmerRepository.findByNameLike("%" + filterItem.getBeeFarmerName() + "%");
 					List<Long> ids = new LinkedList<Long>();
 					if (beeFarmers != null && beeFarmers.size() == 0) {
 						predicates.add(root.<Long>get("farmerId").in(ids));
@@ -162,6 +157,9 @@ public class BeeBox  implements Comparable<BeeBox> {
 					calendar.add(Calendar.DATE, 1);
 					Date maxDate = calendar.getTime();
 					predicates.add(cb.between(root.<Date>get("productionDate"), filterItem.getProductionDate(), maxDate));
+				}
+				if(!StringUtils.isEmpty(filterItem.getManfaucturer())) {
+					predicates.add(cb.like(root.<String>get("manufacturer"), "%" + filterItem.getManfaucturer() + "%"));
 				}
 				if (filterItem.getMinLatitude() != null) {
 					predicates.add(cb.greaterThan(root.<BigDecimal>get("lat"), filterItem.getMinLatitude()));

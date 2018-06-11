@@ -198,6 +198,19 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 	}
 	
 	@Override
+	public List<BeeFarmer> getBeeFarmersByOrganizationIdIn(List<Long> organizationIds) {
+		if(organizationIds==null || organizationIds.size()==0) {
+			return null;
+		}
+		List<BeeFarmer> beeFarmers = beeFarmerRepository.findByOrganizationIdIn(organizationIds);
+		if(beeFarmers == null || beeFarmers.size() == 0) {
+			return null;
+		}
+		return beeFarmers;
+	}
+
+	
+	@Override
 	@Transactional
 	public void delete(List<Long> ids) {
 		if(ids==null || ids.size()==0) {

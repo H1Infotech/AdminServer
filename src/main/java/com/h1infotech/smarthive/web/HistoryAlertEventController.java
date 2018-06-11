@@ -1,6 +1,8 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -79,7 +81,7 @@ public class HistoryAlertEventController {
     @ResponseBody
 	public Response<List<HistoryAlertEvent>> searchHistoryAlertEvents(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
     	try {
-    		logger.info("====Catching the Request for Getting Events: {}====");
+    		logger.info("====Catching the Request for Getting Events: {}====",JSONObject.toJSONString(request));
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
@@ -103,7 +105,7 @@ public class HistoryAlertEventController {
 				events = historyAlertEventRepository.findByAdminIdIn(ids);
     		}
     		
-    		if(events==null || events.size()==0) {
+    		if(events!=null && events.size()>0 && request!=null && StringUtils.isEmpty(request.getKeyword())) {
     			Iterator<HistoryAlertEvent> iterator = events.iterator();
     			while(iterator.hasNext()) {
     				if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {

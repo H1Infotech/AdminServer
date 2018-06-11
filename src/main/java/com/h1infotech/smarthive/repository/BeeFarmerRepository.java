@@ -21,7 +21,7 @@ public interface BeeFarmerRepository extends PagingAndSortingRepository<BeeFarme
 	List<BeeFarmer> findByNameLike(String pattern);
     Page<BeeFarmer> findByOrganizationIdIn(List<Long> ids, Pageable page);
     void deleteByIdIn(List<Long> ids);
-    @Query(value = "update beeFarmer set organizationId = null where organizationId in: organizationIds", nativeQuery = true)  
+    @Query(value = "update beeFarmer set organizationId = null where organizationId in :organizationIds", nativeQuery = true)  
     @Modifying
     void wipeOutOrganizationId(@Param(value = "organizationIds")List<Long> organizationIds);
     @Query(value = "update beeFarmer set password= :password, firstTimeLogin= :firstTimeLogin where name= :userName", nativeQuery = true)  

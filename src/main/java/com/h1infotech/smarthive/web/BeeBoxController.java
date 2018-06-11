@@ -419,10 +419,10 @@ public class BeeBoxController {
 		if(request==null 
 				|| request.getBeginDate()==null
 				|| request.getEndDate()==null
-				|| request.getBoxId()==null) {
+				|| StringUtils.isEmpty(request.getBeeBoxNo())) {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
-		return Response.success(intervalSensorDataService.getIntervalSensorData(request.getBoxId(), request.getBeginDate(), request.getEndDate()));
+		return Response.success(intervalSensorDataService.getIntervalSensorData(request.getBeeBoxNo(), request.getBeginDate(), request.getEndDate()));
     	} catch(BusinessException e) {
     		logger.error("====Search Error====",e);
     		return Response.fail(e.getCode(), e.getMessage());

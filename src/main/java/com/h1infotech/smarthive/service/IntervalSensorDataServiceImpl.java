@@ -16,9 +16,9 @@ public class IntervalSensorDataServiceImpl implements IntervalSensorDataService 
 	IntervalSensorDataRepository intervalSensorDataRepository;
 	
 	@Override
-	public List<IntervalSensorData> getIntervalSensorData(Long boxId, Date beginDate, Date endData) {
+	public List<IntervalSensorData> getIntervalSensorData(String beeBoxNo, Date beginDate, Date endData) {
 		try {             
-			List<IntervalSensorData> sensorData = intervalSensorDataRepository.findByBoxIdIsAndCreateDateBetweenOrderByCreateDateAsc(boxId, beginDate, endData);
+			List<IntervalSensorData> sensorData = intervalSensorDataRepository.findByBeeBoxNoIsAndCreateDateBetweenOrderByCreateDateAsc(beeBoxNo, beginDate, endData);
 			if(sensorData.size() <= 300) {
 				return sensorData;
 			}
@@ -43,7 +43,7 @@ public class IntervalSensorDataServiceImpl implements IntervalSensorDataService 
 					gravity /= batchSize;
 					battery /= batchSize;
 					IntervalSensorData intervalSensorData = new IntervalSensorData();
-					intervalSensorData.setBoxId(boxId);
+					intervalSensorData.setBeeBoxNo(beeBoxNo);
 					intervalSensorData.setBattery(battery);
 					intervalSensorData.setGravity(gravity);
 					intervalSensorData.setHumidity(humidity);

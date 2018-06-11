@@ -1,8 +1,10 @@
 package com.h1infotech.smarthive.web;
 
+import java.util.Map;
 import java.util.List;
 import org.slf4j.Logger;
 import java.util.Iterator;
+import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -16,20 +18,18 @@ import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.AdminRightEnum;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.service.BeeFarmerService;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
+import com.h1infotech.smarthive.repository.AdminRepository;
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.RequestMapping;
 import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
-import com.h1infotech.smarthive.web.request.OrganizationAddUpdateRequest;
 import com.h1infotech.smarthive.web.request.OrganizationDeletionRequest;
+import com.h1infotech.smarthive.web.request.OrganizationAddUpdateRequest;
 import com.h1infotech.smarthive.web.request.OrganizationPageRetrievalRequest;
 import com.h1infotech.smarthive.web.response.OrganizationPageRetrievalResponse;
 
@@ -47,6 +47,9 @@ public class OrganizationController {
 	
 	@Autowired
 	BeeFarmerService beeFarmerService;
+	
+	@Autowired
+	AdminRepository adminRepository;
 	
     @PostMapping(path = "/getPageOrganizations")
     @ResponseBody
@@ -174,7 +177,7 @@ public class OrganizationController {
 				throw new BusinessException(BizCodeEnum.NO_RIGHT);
 			}
 			if(request.getId()!=null) {
-				Organization organizationDB = organizationService.getOrganizationByAdminIdAndId(admin.getId(), request.getId());
+				Organization organizationDB = organizationService.getOrganizationById(request.getId());
 				if(organizationDB==null) {
 					throw new BusinessException(BizCodeEnum.NO_RIGHT);
 				}
@@ -193,7 +196,7 @@ public class OrganizationController {
 	
 	@PostMapping(path = "/searchOrganization")
 	@ResponseBody
-	public Response<List<Organization>> searchOrganization(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
+	public Response<Object> searchOrganization(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
 		try {
 			logger.info("====Catching the Request for Getting Paged Organizations====");
 			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
@@ -232,4 +235,67 @@ public class OrganizationController {
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 	}
+	
+	@PostMapping(path = "/getOrganizationAdmin")
+	@ResponseBody
+	public Response<Object> getOrganizationAdmin(HttpServletRequest httpRequest, @RequestBody Map<String,Long> reqMap) {
+		try {
+			logger.info("====Catching the Request for Getting Organization Amdin: {}====", JSONObject.toJSONString(reqMap));
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			if(reqMap==null || reqMap.get("organizationId")==null) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			Organization organization = organizationService.getOrganizationById(reqMap.get("organizationId"));
+			if(organization==null) {
+				return Response.success(null);
+			}
+			Optional<Admin> adminDB = adminRepository.findById(organization.getAdminId());
+			if(adminDB.isPresent()) {
+				return Response.success(adminDB.get());
+			}
+			return Response.success(null);
+		} catch (BusinessException e) {
+			logger.error("====Get Organization Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Get Organization Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+	
+	@PostMapping(path = "/getBeeFarmerAdmin")
+	@ResponseBody
+	public Response<Object> getBeeFarmerAdmin(HttpServletRequest httpRequest, @RequestBody Map<String,Long> reqMap) {
+		try {
+			logger.info("====Catching the Request for Getting Organization Amdin: {}====", JSONObject.toJSONString(reqMap));
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			if(reqMap==null || reqMap.get("organizationId")==null) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			Organization organization = organizationService.getOrganizationById(reqMap.get("organizationId"));
+			if(organization==null) {
+				return Response.success(null);
+			}
+			Optional<Admin> adminDB = adminRepository.findById(organization.getAdminId());
+			if(adminDB.isPresent()) {
+				return Response.success(adminDB.get());
+			}
+			return Response.success(null);
+		} catch (BusinessException e) {
+			logger.error("====Get Organization Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Get Organization Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+	}
+
 }

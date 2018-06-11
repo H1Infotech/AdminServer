@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.domain.Organization;
@@ -82,14 +84,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<Organization> getOrganization() {
-		Iterable<Organization> organizations = organizationRepository.findAll();
+		Sort sort = new Sort(Sort.Direction.ASC, "id");
+		Iterable<Organization> organizations = organizationRepository.findAll(sort);
 		return convertList(organizations);
 		
 	}
 	
 	@Override
 	public List<Organization> getOrganization(long adminId) {
-		return organizationRepository.findByAdminId(adminId);
+		Sort sort = new Sort(Sort.Direction.ASC, "id");
+		return organizationRepository.findByAdminId(adminId, sort);
 	}
 	
 	private List<Organization> convertList(Iterable<Organization> from){

@@ -1,6 +1,7 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.List;
 import org.slf4j.Logger;
 import java.util.HashMap;
@@ -50,9 +51,6 @@ public class AdminController {
 	private Logger logger = LoggerFactory.getLogger(AdminController.class);
 
 	@Autowired
-	OrganizationRepository organizationRepository;
-	
-	@Autowired
 	BeeFarmerService beeFarmerService;
 	
     @Autowired
@@ -63,6 +61,9 @@ public class AdminController {
 		
 	@Autowired
 	private AdminRepository adminRepository;
+	
+	@Autowired
+	OrganizationRepository organizationRepository;
 	
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -78,6 +79,34 @@ public class AdminController {
 	
 	@Autowired
 	private BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
+	
+    @GetMapping(path = "/getAdminInfo")
+    @ResponseBody
+    public Response<Object> getAdminInfo(HttpServletRequest httpRequest){
+    	
+		try {
+			logger.info("====Catching the Request for Getting Paged Admins: {}====");
+
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			if(admin.getOrganizationId()!=null) {
+				Optional<Organization> organization = organizationRepository.findById(admin.getOrganizationId());
+				if(organization.isPresent()) {
+					admin.setOrganizationName(organization.get().getOrganizationName());
+				}
+			}
+			return Response.success(admin);
+		} catch (BusinessException e) {
+			logger.error("====Get Paged Admins Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Get Paged Admins Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+    }
 	
 	//获取分页管理员
     @PostMapping(path = "/getPageAdmins")
@@ -120,8 +149,12 @@ public class AdminController {
     		logger.info("====Catching the Request for Getting All Organization Admins====");
     		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
-    		if(admin==null) {
+    		if(admin==null || admin.getType()==null) {
     			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    		}
+    		if(admin.getType()==AdminTypeEnum.ORGANIZATION_ADMIN.getType() 
+    				|| admin.getType()==AdminTypeEnum.NO_ORGANIZATION_ADMIN.getType()) {
+    			return Response.success(null);
     		}
     		return Response.success(adminService.getAllOrganizationAdmins());
     	} catch(BusinessException e) {
@@ -261,7 +294,7 @@ public class AdminController {
 			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 		}
 		List<Admin> admins = adminService.getAdmins(admin.getId());
-		if(admins==null || admins.size()==0) {
+		if(admins!=null && admins.size()>0) {
 			Iterator<Admin> iterator = admins.iterator();
 			while(iterator.hasNext()) {
 				if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {

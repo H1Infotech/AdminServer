@@ -5,9 +5,9 @@ import java.util.List;
 import java.math.BigDecimal;
 
 public class FilterItem {
-	private Long minId;
-	private Long maxId;
-	private Long Id;
+	private String minBeeBoxNo;
+	private String maxBeeBoxNo;
+	private String beeBoxno;
 	private String beeFarmerName;
 	private Long beeFarmerId;
 	private String manfaucturer;
@@ -29,28 +29,28 @@ public class FilterItem {
 		this.beeFarmerIds = beeFarmerIds;
 	}
 
-	public Long getMinId() {
-		return minId;
+	public String getMinBeeBoxNo() {
+		return minBeeBoxNo;
 	}
 
-	public void setMinId(Long minId) {
-		this.minId = minId;
+	public void setMinBeeBoxNo(String minBeeBoxNo) {
+		this.minBeeBoxNo = minBeeBoxNo;
 	}
 
-	public Long getMaxId() {
-		return maxId;
+	public String getMaxBeeBoxNo() {
+		return maxBeeBoxNo;
 	}
 
-	public void setMaxId(Long maxId) {
-		this.maxId = maxId;
+	public void setMaxBeeBoxNo(String maxBeeBoxNo) {
+		this.maxBeeBoxNo = maxBeeBoxNo;
 	}
 
-	public Long getId() {
-		return Id;
+	public String getBeeBoxno() {
+		return beeBoxno;
 	}
 
-	public void setId(Long id) {
-		Id = id;
+	public void setBeeBoxno(String beeBoxno) {
+		this.beeBoxno = beeBoxno;
 	}
 
 	public String getBeeFarmerName() {

@@ -10,6 +10,7 @@ public interface BeeFarmerService {
 	void wipeOutOrganizationId(List<Long> organizationIds);
 	List<BeeFarmer> getOrganizationBeeFarmers(Long organizatioId);
 	List<Long> getBeeFarmerIdsByOrganizationIdIn(List<Long> organizationIds);
+	List<BeeFarmer> getBeeFarmersByOrganizationIdIn(List<Long> organizationIds);
 	BeeFarmer getBeeFarmerByUserName(String userName);
 	BeeFarmerPageRetrievalResponse getBeeFarmers(int pageNo, int pageSize);
 	BeeFarmerPageRetrievalResponse getBeeFarmers(List<Long> ids, int pageNo, int pageSize);

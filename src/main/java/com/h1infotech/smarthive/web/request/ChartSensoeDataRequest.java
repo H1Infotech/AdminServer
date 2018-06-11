@@ -6,7 +6,7 @@ public class ChartSensoeDataRequest {
 	
 	private Date beginDate;
 	private Date endDate;
-	private Long boxId;
+	private String beeBoxNo;
 	
 	public Date getBeginDate() {
 		return beginDate;
@@ -20,10 +20,10 @@ public class ChartSensoeDataRequest {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
-	public Long getBoxId() {
-		return boxId;
+	public String getBeeBoxNo() {
+		return beeBoxNo;
 	}
-	public void setBoxId(Long boxId) {
-		this.boxId = boxId;
+	public void setBeeBoxNo(String beeBoxNo) {
+		this.beeBoxNo = beeBoxNo;
 	}
 }

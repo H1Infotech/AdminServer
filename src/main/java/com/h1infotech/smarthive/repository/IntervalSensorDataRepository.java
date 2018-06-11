@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IntervalSensorDataRepository extends JpaRepository<IntervalSensorData, Long> {
 	void deleteByFarmerIdIn(List<Long> ids);
-	List<IntervalSensorData> findByBoxIdIsAndCreateDateBetweenOrderByCreateDateAsc(Long boxId, Date startDate, Date endDate);
+	List<IntervalSensorData> findByBeeBoxNoIsAndCreateDateBetweenOrderByCreateDateAsc(String beeBoxNo, Date startDate, Date endDate);
 }
