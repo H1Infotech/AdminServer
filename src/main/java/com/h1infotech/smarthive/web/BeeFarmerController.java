@@ -1,20 +1,22 @@
 package com.h1infotech.smarthive.web;
 
-import java.util.List;
 import java.util.Map;
-
+import java.util.List;
 import org.slf4j.Logger;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
 import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.Admin;
 import com.h1infotech.smarthive.common.MyUtils;
 import com.h1infotech.smarthive.common.Response;
+import org.springframework.data.domain.Pageable;
 import com.h1infotech.smarthive.domain.BeeFarmer;
+import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
@@ -27,10 +29,6 @@ import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RestController;
 import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
@@ -39,8 +37,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.h1infotech.smarthive.web.request.BeeFarmerAddAndUpdateRequest;
 import com.h1infotech.smarthive.web.request.BeeFarmerPageRetrievalRequest;
 import com.h1infotech.smarthive.web.response.BeeFarmerPageRetrievalResponse;
-import com.h1infotech.smarthive.web.request.OrganizationFarmerDeletionRequest;
 import com.h1infotech.smarthive.web.request.PageOrganizationBeeFarmerRequest;
+import com.h1infotech.smarthive.web.request.OrganizationFarmerDeletionRequest;
 import com.h1infotech.smarthive.web.request.OrganizationBeeFarmerRetrievalRequst;
 
 @RestController

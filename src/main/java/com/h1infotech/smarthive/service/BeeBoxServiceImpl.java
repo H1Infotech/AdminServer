@@ -34,7 +34,7 @@ public class BeeBoxServiceImpl implements BeeBoxService {
 		Pageable page = PageRequest.of(pageNo-1, pageSize, Sort.Direction.ASC, "id");
 		Page<BeeBox> pageBeeBox = beeBoxRepository.findAll(page);
 		BeeBoxPageRetrievalResponse response = new BeeBoxPageRetrievalResponse();
-		if(pageBeeBox==null || pageBeeBox.getContent()==null) {
+		if(pageBeeBox==null || pageBeeBox.getContent()==null || pageBeeBox.getContent().size()==0) {
 			response.setCurrentPageNo(pageNo);
 			response.setTotalPageNo(0);
 		}else {

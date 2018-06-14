@@ -1,10 +1,10 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.List;
 import org.slf4j.Logger;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Iterator;
 import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
@@ -85,8 +85,7 @@ public class AdminController {
     public Response<Object> getAdminInfo(HttpServletRequest httpRequest){
     	
 		try {
-			logger.info("====Catching the Request for Getting Paged Admins: {}====");
-
+			logger.info("====Catching the Request for Getting Paged Admins====");
 			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 			if (admin == null) {
@@ -192,7 +191,9 @@ public class AdminController {
     		for(BeeBoxGroup beeBoxGroup: beeBoxGroups) {
     			beeBoxGroupIds.add(beeBoxGroup.getId());
     		}
-    		beeBoxGroupAssociationRepository.deleteByGroupIdIn(beeBoxGroupIds);
+    		if(beeBoxGroupIds!=null && beeBoxGroupIds.size()>0) {
+    			beeBoxGroupAssociationRepository.deleteByGroupIdIn(beeBoxGroupIds);
+    		}
 			return Response.success(null);
     	} catch(BusinessException e) {
     		logger.error("====Get Organization Admin Error====", e);
@@ -235,7 +236,7 @@ public class AdminController {
 				do {
 					userName = MyUtils.getUserName(request.getName());
 					alterAdmin = adminRepository.findDistinctFirstByUsername(userName);
-				}while(alterAdmin==null && count-- > 0);
+				}while(alterAdmin!=null && count-- > 0);
 				if(alterAdmin!=null) {
 					throw new BusinessException(BizCodeEnum.REGISTER_USER_EXIST_ERROR);
 				}
@@ -262,7 +263,7 @@ public class AdminController {
 					alterAdmin.setPassword(bCryptPasswordEncoder.encode(alterAdmin.getPassword()));
 				}
 				
-				alterAdmin.setUpdateDate(adminDB.getUpdateDate());
+				alterAdmin.setCreateDate(adminDB.getCreateDate());
 				adminRightRepository.deleteByAdminId(alterAdmin.getId());
 				if(request.getAdminRight()!=null && request.getAdminRight().size()>0) {
 					for(AdminRight adminRight: request.getAdminRight()) {

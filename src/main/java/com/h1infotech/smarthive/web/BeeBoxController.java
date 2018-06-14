@@ -1,7 +1,9 @@
 package com.h1infotech.smarthive.web;
 
+import java.util.Map;
 import java.util.List;
 import org.slf4j.Logger;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,8 +16,11 @@ import org.springframework.data.domain.Page;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.Admin;
 import com.h1infotech.smarthive.domain.BeeBox;
+import com.h1infotech.smarthive.domain.BeeBoxGroup;
+import com.h1infotech.smarthive.domain.BeeBoxGroupAssociation;
 import com.h1infotech.smarthive.common.Response;
 import org.springframework.data.domain.Pageable;
+import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.domain.SensorData;
 import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.common.BizCodeEnum;
@@ -30,6 +35,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.h1infotech.smarthive.service.SensorDataService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
+import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 import com.h1infotech.smarthive.repository.BeeBoxRepository;
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,6 +45,7 @@ import com.h1infotech.smarthive.web.request.BeeBoxAddRequest;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.repository.SensorDataRepository;
 import com.h1infotech.smarthive.service.IntervalSensorDataService;
 import com.h1infotech.smarthive.web.response.OverviewDataResponse;
@@ -46,6 +55,7 @@ import com.h1infotech.smarthive.web.request.ChartSensoeDataRequest;
 import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.BeeBoxSensorDataRequest;
 import com.h1infotech.smarthive.web.request.BeeBoxPageRetrievalRequest;
+import com.h1infotech.smarthive.repository.HistoryAlertEventRepository;
 import com.h1infotech.smarthive.web.response.BeeBoxPageRetrievalResponse;
 
 @RestController
@@ -68,6 +78,15 @@ public class BeeBoxController {
 	
     @Autowired
     SensorDataService sensorDataService;
+    
+    @Autowired
+    HistoryAlertEventRepository historyAlertEventRepository;
+    
+    @Autowired
+    BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
+    
+	@Autowired
+	BeeFarmerRepository beeFarmerRepository;
 	
 	@Autowired
 	OrganizationService organizationService;
@@ -78,14 +97,14 @@ public class BeeBoxController {
 	@Autowired
 	IntervalSensorDataService intervalSensorDataService;
 	
+	@Autowired
+	BeeBoxGroupRepository beeBoxGroupRepository;
+	
 	@PostMapping(path = "/getAllBeeBoxSensorData")
 	@ResponseBody
 	public Response<List<SensorData>> getAllBeeBoxSensorData(HttpServletRequest httpRequest, @RequestBody AmbiguousSearchRequest request) {
 		try {
-			if (request == null) {
-				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
-			}
-			logger.info("====Catching the Request for Getting BeeBox Sensor Data====");
+			logger.info("====Catching the Request for Getting BeeBox Sensor Data. Ambiguous Search Request: {}====", JSONObject.toJSONString(request));
 			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 			if (admin == null) {
@@ -101,12 +120,18 @@ public class BeeBoxController {
 					break;
 				case ORGANIZATION_ADMIN:
 					organizationIds = organizationService.getIdsByAdminId(admin.getId());
-					beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
-					beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+					if(organizationIds!=null && organizationIds.size()>0) {
+						beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
+						if(beeFarmerIds!=null && beeFarmerIds.size()>0) {
+							beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+						}
+					}
 					break;
 				case NO_ORGANIZATION_ADMIN:
 					beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
-					beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+					if(beeFarmerIds!=null && beeFarmerIds.size()>0) {
+						beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+					}
 					break;
 			}
 			if (beeBoxes == null || beeBoxes.size() == 0) {
@@ -114,12 +139,10 @@ public class BeeBoxController {
 			}
 			
     		if(!StringUtils.isEmpty(request.getKeyword())) {
-    			if(beeBoxes==null || beeBoxes.size()==0) {
-    				Iterator<BeeBox> iterator = beeBoxes.iterator();
-    				while(iterator.hasNext()) {
-    					if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {
-    						iterator.remove();
-    					}
+   				Iterator<BeeBox> iterator = beeBoxes.iterator();
+   				while(iterator.hasNext()) {
+    				if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {
+    					iterator.remove();
     				}
     			}
     		}
@@ -129,6 +152,7 @@ public class BeeBoxController {
 			for (BeeBox beeBox : beeBoxes) {
 				if (beeBox.getLatestSensorDataId() == null) {
 					SensorData data = new SensorData();
+					data.setId(beeBox.getId());
 					data.setBeeBoxNo(beeBox.getBeeBoxNo());
 					data.setStatus(3);
 					sensorData.add(data);
@@ -144,69 +168,10 @@ public class BeeBoxController {
 			logger.error(e.getMessage(), e);
 			return Response.fail(e.getCode(), e.getMessage());
 		} catch (Exception e) {
-			logger.error("Get BeeBox Info Error", e);
+			logger.error("getAllBeeBoxSensorData", e);
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 	}  
-//    @PostMapping(path = "/getBeeBoxeSensorData")
-//    @ResponseBody
-//    public Response<List<SensorData>> getBeeBoxes(HttpServletRequest httpRequest) {
-//    	try {
-//    		if(request == null) {
-//    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
-//    		}
-//    		logger.info("====Catching the Request for Getting beeBox: {}====", JSONObject.toJSONString(request));
-//    		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
-//    		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
-//    		if(admin==null) {
-//    			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
-//    		}
-//    		Sort sort = null;
-//    		List<BeeBox> beeBoxes = null;
-//    		List<Long> beeFarmerIds = null;
-//    		List<Long> organizationIds = null;
-//    		switch(AdminTypeEnum.getEnum(admin.getType())) {
-//    			case SUPER_ADMIN:
-//    			case SENIOR_ADMIN:
-//    				beeBoxes = beeBoxService.getAllBeeBoxes();
-//    				break;
-//    			case ORGANIZATION_ADMIN:
-//    				organizationIds = organizationService.getIdsByAdminId(admin.getId());
-//    				beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
-//    				sort = new Sort(Sort.Direction.ASC,"id");
-//    				if(beeFarmerIds!=null && beeFarmerIds.size()>0){
-//    					beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds, sort);
-//    				}
-//    				break;
-//    			case NO_ORGANIZATION_ADMIN:
-//    				beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
-//    				sort = new Sort(Sort.Direction.ASC,"id");
-//    				if(beeFarmerIds!=null && beeFarmerIds.size()>0){
-//    					beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds, sort);
-//    				}
-//    				break;
-//    		}
-//    		if(StringUtils.isEmpty(request.getKeyword())) {
-//    			if(beeBoxes==null || beeBoxes.size()==0) {
-//    				Iterator<BeeBox> iterator = beeBoxes.iterator();
-//    				while(iterator.hasNext()) {
-//    					if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {
-//    						iterator.remove();
-//    					}
-//    				}
-//    			}
-//    		}
-//    		
-//    		
-//    		return Response.success(beeBoxes);
-//    	}catch(BusinessException e) {
-//    		logger.error(e.getMessage(), e);
-//    		return Response.fail(e.getCode(), e.getMessage());
-//    	}catch(Exception e) {
-//    		logger.error("Get BeeBox Info Error",e);
-//    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
-//    	}
-//    }
     
     @PostMapping(path = "/getPagedBeeBoxes")
     @ResponseBody
@@ -232,14 +197,26 @@ public class BeeBoxController {
     			return Response.success(beeBoxService.getAllBeeBoxes(request.getPageNo(), request.getPageSize()));
     		case ORGANIZATION_ADMIN:
     			organizationIds = organizationService.getIdsByAdminId(admin.getId());
+    			if(organizationIds==null || organizationIds.size()==0) {
+        			response = new BeeBoxPageRetrievalResponse();
+    				response.setCurrentPageNo(request.getPageNo());
+    				response.setTotalPageNo(0);
+    				return Response.success(response);
+    			}
     			beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
+    			if(beeFarmerIds==null || beeFarmerIds.size()==0) {
+        			response = new BeeBoxPageRetrievalResponse();
+    				response.setCurrentPageNo(request.getPageNo());
+    				response.setTotalPageNo(0);
+    				return Response.success(response);
+    			}
     			if(request.getPageNo() < 1 || request.getPageSize() < 0) {
     				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     			}
     			page = PageRequest.of(request.getPageNo()-1, request.getPageSize(), Sort.Direction.ASC, "id");
     			beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds,page);
     			response = new BeeBoxPageRetrievalResponse();
-    			if(beeBoxes==null || beeBoxes.getContent()==null) {
+    			if(beeBoxes==null || beeBoxes.getContent()==null || beeBoxes.getContent().size()==0) {
     				response.setCurrentPageNo(request.getPageNo());
     				response.setTotalPageNo(0);
     			}else {
@@ -250,13 +227,19 @@ public class BeeBoxController {
     			return Response.success(response);
     		case NO_ORGANIZATION_ADMIN:
     			beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
+    			if(beeFarmerIds==null || beeFarmerIds.size()==0) {
+        			response = new BeeBoxPageRetrievalResponse();
+    				response.setCurrentPageNo(request.getPageNo());
+    				response.setTotalPageNo(0);
+    				return Response.success(response);
+    			}
     			if(request.getPageNo() < 1 || request.getPageSize() < 0) {
     				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     			}
     			page = PageRequest.of(request.getPageNo()-1, request.getPageSize(), Sort.Direction.ASC, "id");
     			beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds,page);
     			response = new BeeBoxPageRetrievalResponse();
-    			if(beeBoxes==null || beeBoxes.getContent()==null) {
+    			if(beeBoxes==null || beeBoxes.getContent()==null || beeBoxes.getContent().size()==0) {
     				response.setCurrentPageNo(request.getPageNo());
     				response.setTotalPageNo(0);
     			}else {
@@ -271,7 +254,7 @@ public class BeeBoxController {
     		logger.error(e.getMessage(), e);
     		return Response.fail(e.getCode(), e.getMessage());
     	}catch(Exception e) {
-    		logger.error("Get BeeBox Info Error",e);
+    		logger.error("getPagedBeeBoxes",e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
@@ -289,13 +272,63 @@ public class BeeBoxController {
     		if(admin==null) {
     			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
     		}
-    		beeBoxRepository.deleteByIdIn(request.getIds());
-    		return Response.success(null);
+    		List<BeeBox> beeBoxes = beeBoxRepository.deleteByIdIn(request.getIds());
+    		historyAlertEventRepository.deleteByBeeBoxIdIn(request.getIds());
+    		List<BeeBoxGroupAssociation> associations = beeBoxGroupAssociationRepository.deleteByBeeBoxIdIn(request.getIds());
+    		if(associations!=null && associations.size()>0) {
+    			Map<Long, Integer> groupBeeBoxNumMap = new HashMap<Long, Integer>();
+    			for(BeeBoxGroupAssociation association: associations) {
+    				if(association!=null && association.getGroupId()!=null) {
+    					Integer num = groupBeeBoxNumMap.get(association.getGroupId());
+        				num = num==null?0:num+1;
+        				groupBeeBoxNumMap.put(association.getGroupId(), num);
+    				}
+    			}
+    			
+    			if(groupBeeBoxNumMap.keySet()!=null && groupBeeBoxNumMap.keySet().size()>0) {
+        			for(Long groupId: groupBeeBoxNumMap.keySet()) {
+        				Optional<BeeBoxGroup> group = beeBoxGroupRepository.findById(groupId);
+        				if(group.isPresent()) {
+        					Integer currentNum = group.get().getBeeBoxNum() - groupBeeBoxNumMap.get(groupId);
+        					currentNum = currentNum<0?0:currentNum;
+        					if(currentNum>0) {
+        						group.get().setBeeBoxNum(currentNum);
+        						beeBoxGroupRepository.save(group.get());
+        					}else {
+        						beeBoxGroupRepository.deleteById(group.get().getId());
+        					}
+        				}
+        			}
+    			}
+    		}
+    		if(beeBoxes==null || beeBoxes.size()==0) {
+    			return Response.success(null);
+    		}
+    		Map<Long, Integer> beeBoxNumMap = new HashMap<Long, Integer>();
+    		for(BeeBox beeBox: beeBoxes) {
+    			if(beeBox!=null && beeBox.getFarmerId()!=null) {
+    				Integer num = beeBoxNumMap.get(beeBox.getFarmerId());
+    				num = num==null?0:num+1;
+    				beeBoxNumMap.put(beeBox.getFarmerId(), num);
+    			}
+    		}
+    		if(beeBoxNumMap.keySet()!=null && beeBoxNumMap.keySet().size()>0) {
+    			for(Long farmerId: beeBoxNumMap.keySet()) {
+    				Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(farmerId);
+    				if(beeFarmer.isPresent()) {
+    					Integer currentNum = beeFarmer.get().getBeeBoxNum() - beeBoxNumMap.get(farmerId);
+    					currentNum = currentNum<0?0:currentNum;
+    					beeFarmer.get().setBeeBoxNum(currentNum);
+    					beeFarmerRepository.save(beeFarmer.get());
+    				}
+    			}
+    		}
+			return Response.success(null);
     	}catch(BusinessException e) {
     		logger.error(e.getMessage(), e);
     		return Response.fail(e.getCode(), e.getMessage());
     	}catch(Exception e) {
-    		logger.error("Get BeeBox Info Error",e);
+    		logger.error("deleteBeeBoxes",e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
@@ -318,7 +351,7 @@ public class BeeBoxController {
     		logger.error(e.getMessage(), e);
     		return Response.fail(e.getCode(), e.getMessage());
     	}catch(Exception e) {
-    		logger.error("Get BeeBox Info Error",e);
+    		logger.error("getBeeBox",e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
@@ -327,7 +360,7 @@ public class BeeBoxController {
     @ResponseBody
     public Response<List<SensorData>> getBeeBoxSensorData(HttpServletRequest httpRequest, @RequestBody BeeBoxSensorDataRequest request){
     	try {
-    		logger.info("====Catching the Request for Sensor Data for beeBox Id====");
+    		logger.info("====Catching the Request for Sensor Data for beeBox Id====", JSONObject.toJSONString(request));
     		if(request==null || request.getBeeBoxNos()==null || request.getBeeBoxNos().size()==0) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
@@ -335,17 +368,30 @@ public class BeeBoxController {
     		if(beeBoxes==null || beeBoxes.size()==0) {
     			return Response.success(null);
     		}
+    		List<SensorData> sensorData = new LinkedList<SensorData>();
     		List<Long> latestSensorDataIds = new LinkedList<Long>();
     		for(BeeBox beeBox: beeBoxes) {
-    			latestSensorDataIds.add(beeBox.getLatestSensorDataId());
+    			if(beeBox.getLatestSensorDataId()!=null) {
+    				latestSensorDataIds.add(beeBox.getLatestSensorDataId());
+    			}else {
+    				SensorData data = new SensorData();
+    				data.setBeeBoxNo(beeBox.getBeeBoxNo());
+    				data.setStatus(BeeBoxStatusEnum.OFFLINE_STATUS.getStatus());
+    				sensorData.add(data);
+    			}
     		}
-    		List<SensorData> sensorData = sensorDataRepository.findByIdIn(latestSensorDataIds);
+    		
+    		if(latestSensorDataIds.size()>0) {
+    			List<SensorData> newSensorData = sensorDataRepository.findByIdIn(latestSensorDataIds);
+    			sensorData.addAll(newSensorData);
+    		}
+    		Collections.sort(sensorData);
         	return Response.success(sensorData);
     	} catch(BusinessException e) {
     		logger.error(e.getMessage(), e);
     		return Response.fail(e.getCode(), e.getMessage());
     	} catch(Exception e) {
-    		logger.error("Get BeeBox Info Error",e);
+    		logger.error("getBeeBoxSensorData",e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
@@ -357,7 +403,7 @@ public class BeeBoxController {
     		if(request == null) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
-    		logger.info("====Catching the Request for Getting beeBox: {}====");
+    		logger.info("====Catching the Request for Getting beeBox====");
     		Admin admin = jwtTokenUtil.getAdmin(request.getHeader("token"));
     		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
     		if(admin==null) {
@@ -373,12 +419,18 @@ public class BeeBoxController {
     			break;
     		case ORGANIZATION_ADMIN:
     			organizationIds = organizationService.getIdsByAdminId(admin.getId());
-    			beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
-    			beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+    			if(organizationIds!=null && organizationIds.size()>0) {
+    				beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
+    				if(beeFarmerIds!=null && beeFarmerIds.size()>0) {
+    					beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+    				}
+    			}
     			break;
     		case NO_ORGANIZATION_ADMIN:
     			beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
-    			beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+    			if(beeFarmerIds!=null && beeFarmerIds.size()>0) {
+    				beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+    			}
     			break;
     		}
     		OverviewDataResponse response = new OverviewDataResponse();
@@ -406,7 +458,7 @@ public class BeeBoxController {
     		logger.error(e.getMessage(), e);
     		return Response.fail(e.getCode(), e.getMessage());
     	}catch(Exception e) {
-    		logger.error("Get BeeBox Info Error",e);
+    		logger.error("getOverviewData",e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
@@ -424,10 +476,10 @@ public class BeeBoxController {
 		}
 		return Response.success(intervalSensorDataService.getIntervalSensorData(request.getBeeBoxNo(), request.getBeginDate(), request.getEndDate()));
     	} catch(BusinessException e) {
-    		logger.error("====Search Error====",e);
+    		logger.error("====getChartSensorData====",e);
     		return Response.fail(e.getCode(), e.getMessage());
     	} catch(Exception e) {
-    		logger.error("====Search Error====",e);
+    		logger.error("====getChartSensorData====",e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
     }
@@ -437,16 +489,23 @@ public class BeeBoxController {
     public Response<String> alterBeeBox(HttpServletRequest httpRequest, @RequestBody BeeBoxAddRequest request) {
     	try {
         	logger.info("====Catching the Request for Getting Chart Sensor Data(token: {}), requst: {}====", httpRequest.getHeader("token"), JSONObject.toJSONString(request));
-        	if(request==null) {
+        	if(request==null || request.getFarmerId()==null) {
         		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
         	}
         	if(request.getId()==null) {
+        		Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(request.getFarmerId());
+        		if(beeFarmer==null || !beeFarmer.isPresent()) {
+        			throw new BusinessException(BizCodeEnum.NO_FARMER_INFO);
+        		}
         		BeeBox beeBox = request.getBeeBoxAdd();
         		BeeBox beeBoxDB = beeBoxRepository.findByBeeBoxNo(beeBox.getBeeBoxNo());
         		if(beeBoxDB!=null) {
         			throw new BusinessException(BizCodeEnum.BEE_BOX_NUMBER_EXISTS);
         		}
         		beeBoxRepository.save(beeBox);
+        		int beeBoxNum = beeFarmer.get().getBeeBoxNum()==null?0:beeFarmer.get().getBeeBoxNum();
+        		beeFarmer.get().setBeeBoxNum(beeBoxNum+1);
+        		beeFarmerRepository.save(beeFarmer.get());
         	}else {
         		Optional<BeeBox> beeBoxDB = beeBoxRepository.findById(request.getId());
         		if(beeBoxDB.isPresent()) {
@@ -454,7 +513,6 @@ public class BeeBoxController {
         			beeBox.setStatus(beeBox.getStatus());
         			beeBox.setLat(beeBox.getLat());
         			beeBox.setLng(beeBox.getLng());
-        			beeBox.setEntryDate(beeBox.getEntryDate());
         			beeBox.setLatestSensorDataId(beeBox.getLatestSensorDataId());
         			beeBox.setProtectionStrategy(beeBox.getProtectionStrategy());
         			beeBox.setUpdateSensorDataTime(beeBox.getUpdateSensorDataTime());

@@ -11,6 +11,8 @@ import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.web.request.LoginRequest;
 import com.h1infotech.smarthive.common.BusinessException;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -66,6 +68,20 @@ public class AuthController {
         		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
         	}
     		return Response.success(authService.updatePassword(request.getUsername(), request.getPassword(), request.getMobile(), request.getSmsCode()));
+    	} catch(BusinessException e) {
+    		logger.error("Update Password Error", e);
+    		return Response.fail(e.getCode(),e.getMessage());
+    	} catch(Exception e) {
+    		logger.error("Update Password Error", e);
+    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    	}
+    }
+    
+    @GetMapping(path = "/checkTokenExpiration")
+    @ResponseBody
+    public Response<Boolean> checkTokenExpiration(HttpServletRequest httpRequest){
+    	try {
+    		return Response.success(jwtTokenUtil.isTokenExpired(httpRequest.getHeader("token")));
     	} catch(BusinessException e) {
     		logger.error("Update Password Error", e);
     		return Response.fail(e.getCode(),e.getMessage());

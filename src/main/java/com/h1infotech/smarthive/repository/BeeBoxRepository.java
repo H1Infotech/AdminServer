@@ -20,7 +20,7 @@ public interface BeeBoxRepository extends JpaRepository<BeeBox, Long>, JpaSpecif
 	Page<BeeBox> findByFarmerIdIn(List<Long> ids, Pageable page);
 	BeeBox findBeeBoxByIdAndFarmerId(Long id, Long farmerId);
 	@Transactional
-	void deleteByIdIn(List<Long> ids);
+	List<BeeBox> deleteByIdIn(List<Long> ids);
 	void deleteByFarmerIdIn(List<Long> farmerIds);
 	void deleteBeeBoxByFarmerIdAndIdIn(Long farmerId, List<Long> ids);
 	

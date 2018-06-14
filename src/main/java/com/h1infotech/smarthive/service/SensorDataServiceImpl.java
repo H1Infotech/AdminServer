@@ -26,6 +26,9 @@ public class SensorDataServiceImpl implements SensorDataService {
 	}
 	
 	public List<SensorData> getSensorDara(List<Long> ids) {
+		if(ids==null || ids.size()==0) {
+			return null;
+		}
 		return sensorDataRepository.findByIdIn(ids);
 	}
 	

@@ -216,8 +216,8 @@ public class OrganizationController {
     		case NO_ORGANIZATION_ADMIN:
     			break;
     		}
-			if(StringUtils.isEmpty(request.getKeyword())) {
-    			if(organizations==null || organizations.size()==0) {
+			if(!StringUtils.isEmpty(request.getKeyword())) {
+    			if(organizations!=null && organizations.size()>0) {
     				Iterator<Organization> iterator = organizations.iterator();
     				while(iterator.hasNext()) {
     					if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {

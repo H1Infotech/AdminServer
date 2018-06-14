@@ -2,6 +2,8 @@ package com.h1infotech.smarthive.web.request;
 
 import java.util.Date;
 import java.math.BigDecimal;
+
+import com.h1infotech.smarthive.common.BeeBoxStatusEnum;
 import com.h1infotech.smarthive.domain.BeeBox;
 
 public class BeeBoxAddRequest {
@@ -27,6 +29,7 @@ public class BeeBoxAddRequest {
 		beeBox.setManufacturer(manufacturer);
 		beeBox.setProductionDate(productionDate);
 		beeBox.setBatchNo(batchNo);
+		beeBox.setStatus(BeeBoxStatusEnum.OFFLINE_STATUS.getStatus());
 		beeBox.setEntryDate(new Date());
 		beeBox.setProtectionStrategy(false);
 		return beeBox;
@@ -40,6 +43,9 @@ public class BeeBoxAddRequest {
 		beeBox.setManufacturer(manufacturer);
 		beeBox.setProductionDate(productionDate);
 		beeBox.setBatchNo(batchNo);
+		beeBox.setStatus(status);
+		beeBox.setEntryDate(entryDate);
+		beeBox.setProtectionStrategy(protectionStrategy);
 		return beeBox;
 	}
 	

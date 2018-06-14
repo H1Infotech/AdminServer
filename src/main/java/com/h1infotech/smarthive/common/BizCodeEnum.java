@@ -7,6 +7,7 @@ public enum BizCodeEnum {
 	REGISTER_ERROR("000020","User Register Error"),
 	REGISTER_USER_EXIST_ERROR("000021","User Already Exists"),
 	NO_USER_INFO("000030","No User Information"),
+	NO_FARMER_INFO("000031","No Farmer Informarion"),
 	NO_RIGHT("000031","No Right"),
 	USER_NAME_INEXISTENCE("000031","User Name Does Not Exist"),
 	USER_NO_MOBILE_NUM_IN_DB("000032","No User Mobile Record"),

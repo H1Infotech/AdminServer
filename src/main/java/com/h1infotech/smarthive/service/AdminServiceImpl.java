@@ -48,22 +48,26 @@ public class AdminServiceImpl implements AdminService {
 		PageRequest page = PageRequest.of(pageNo-1, pageSize, Sort.Direction.ASC, "id");
 		Page<Admin> pageAdmin = adminRepository.findByTypeNotAndIdNot(AdminTypeEnum.SUPER_ADMIN.getType(), excludeId, page);
 		AdminPageRetrievalResponse response = new AdminPageRetrievalResponse();
-		if(pageAdmin.getContent()!=null && pageAdmin.getContent().size()>0) {
+		if(pageAdmin!=null && pageAdmin.getContent()!=null && pageAdmin.getContent().size()>0) {
 			List<Long> organizationIds = new LinkedList<Long>();
 			for(Admin admin: pageAdmin.getContent()) {
-				organizationIds.add(admin.getOrganizationId());
-			}
-			List<Organization> organizations = organizationRepository.findByIdIn(organizationIds);
-			Map<Long, Organization> map = new HashMap<Long, Organization>();
-			if(organizations!=null && organizations.size()>0) {
-				for(Organization organization: organizations) {
-					map.put(organization.getId(), organization);
+				if(admin.getOrganizationId()!=null) {
+					organizationIds.add(admin.getOrganizationId());
 				}
 			}
-			for(Admin admin: pageAdmin.getContent()) {
-				Organization organization = map.get(admin.getOrganizationId());
-				if(organization!=null && StringUtils.isEmpty(organization.getOrganizationName())) {
-					admin.setOrganizationName(organization.getOrganizationName());
+			if(organizationIds!=null && organizationIds.size()>0) {
+				List<Organization> organizations = organizationRepository.findByIdIn(organizationIds);
+				Map<Long, Organization> map = new HashMap<Long, Organization>();
+				if(organizations!=null && organizations.size()>0) {
+					for(Organization organization: organizations) {
+						map.put(organization.getId(), organization);
+					}
+				}
+				for(Admin admin: pageAdmin.getContent()) {
+					Organization organization = map.get(admin.getOrganizationId());
+					if(organization!=null && !StringUtils.isEmpty(organization.getOrganizationName())) {
+						admin.setOrganizationName(organization.getOrganizationName());
+					}
 				}
 			}
 			response.setCurrentPageNo(pageNo);
@@ -78,23 +82,28 @@ public class AdminServiceImpl implements AdminService {
 	
 	@Override
 	public List<Admin> getAdmins(long excludeId) {
-		List<Admin> admins = adminRepository.findByTypeNotAndIdNot(AdminTypeEnum.SUPER_ADMIN.getType(), excludeId);
+		Sort sort = new Sort(Sort.Direction.ASC, "id");
+		List<Admin> admins = adminRepository.findByTypeNotAndIdNot(AdminTypeEnum.SUPER_ADMIN.getType(), excludeId, sort);
 		if(admins!=null && admins.size()>0) {
 			List<Long> organizationIds = new LinkedList<Long>();
 			for(Admin admin: admins) {
-				organizationIds.add(admin.getOrganizationId());
-			}
-			List<Organization> organizations = organizationRepository.findByIdIn(organizationIds);
-			Map<Long, Organization> map = new HashMap<Long, Organization>();
-			if(organizations!=null && organizations.size()>0) {
-				for(Organization organization: organizations) {
-					map.put(organization.getId(), organization);
+				if(admin.getOrganizationId()!=null) {
+					organizationIds.add(admin.getOrganizationId());
 				}
 			}
-			for(Admin admin: admins) {
-				Organization organization = map.get(admin.getOrganizationId());
-				if(organization!=null && StringUtils.isEmpty(organization.getOrganizationName())) {
-					admin.setOrganizationName(organization.getOrganizationName());
+			if(organizationIds!=null && organizationIds.size()>0) {
+				List<Organization> organizations = organizationRepository.findByIdIn(organizationIds);
+				Map<Long, Organization> map = new HashMap<Long, Organization>();
+				if(organizations!=null && organizations.size()>0) {
+					for(Organization organization: organizations) {
+						map.put(organization.getId(), organization);
+					}
+				}
+				for(Admin admin: admins) {
+					Organization organization = map.get(admin.getOrganizationId());
+					if(organization!=null && StringUtils.isEmpty(organization.getOrganizationName())) {
+						admin.setOrganizationName(organization.getOrganizationName());
+					}
 				}
 			}
 		}
@@ -106,7 +115,8 @@ public class AdminServiceImpl implements AdminService {
 		List<Integer> types = new LinkedList<Integer>();
 		types.add(3);
 		types.add(4);
-		return adminRepository.findByTypeIn(types);
+		Sort sort = new Sort(Sort.Direction.ASC, "id");
+		return adminRepository.findByTypeIn(types,sort);
 	}
 
 }

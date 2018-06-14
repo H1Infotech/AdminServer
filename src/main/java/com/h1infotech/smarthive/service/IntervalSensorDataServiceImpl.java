@@ -2,7 +2,9 @@ package com.h1infotech.smarthive.service;
 
 import java.util.Date;
 import java.util.List;
+import org.slf4j.Logger;
 import java.util.LinkedList;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.domain.IntervalSensorData;
@@ -11,6 +13,9 @@ import com.h1infotech.smarthive.repository.IntervalSensorDataRepository;
 
 @Service
 public class IntervalSensorDataServiceImpl implements IntervalSensorDataService {
+	
+	private Logger logger = LoggerFactory.getLogger(IntervalSensorDataServiceImpl.class);
+
 	
 	@Autowired
 	IntervalSensorDataRepository intervalSensorDataRepository;
@@ -36,7 +41,7 @@ public class IntervalSensorDataServiceImpl implements IntervalSensorDataService 
 				airPressure += sensorData.get(i).getAirPressure()==null?0.0:sensorData.get(i).getAirPressure();
 				gravity += sensorData.get(i).getGravity()==null?0.0:sensorData.get(i).getGravity();
 				battery += sensorData.get(i).getBattery()==null?0.0:sensorData.get(i).getBattery();
-				if(count++ == batchSize-1) {
+				if(count++ == batchSize) {
 					temperature /= batchSize;
 					humidity /= batchSize;
 					airPressure /= batchSize;
@@ -56,14 +61,15 @@ public class IntervalSensorDataServiceImpl implements IntervalSensorDataService 
 					temperature = 0.0;
 					humidity = 0.0;
 					airPressure = 0.0;
+					gravity = 0.0;
 					battery = 0.0;
 				}
 			}
 			return mergedSensorData;
 		}catch(BusinessException e) {
-			
+			logger.warn("Calculate Interval Data Error",e);
 		}catch(Exception e) {
-			
+			logger.warn("Calculate Interval Data Error",e);
 		}
 		return null;
 	}

@@ -10,4 +10,6 @@ public interface BeeBoxGroupAssociationRepository extends JpaRepository<BeeBoxGr
 	List<BeeBoxGroupAssociation> findByBeeBoxId(Long beeBoxId);
 	@Transactional
 	void deleteByGroupIdIn(List<Long> ids);
+	@Transactional
+	List<BeeBoxGroupAssociation> deleteByBeeBoxIdIn(List<Long> ids);
 }

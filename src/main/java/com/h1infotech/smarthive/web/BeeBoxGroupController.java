@@ -115,11 +115,12 @@ public class BeeBoxGroupController {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
 			List<BeeBox> boxes = null;
+			List<Long> organizationIds = null;
+			List<Long> beeFarmerIds = null;
 			List<BeeBox> beeBoxes = new LinkedList<BeeBox>();
 			switch (AdminTypeEnum.getEnum(admin.getType())) {
 			case SUPER_ADMIN:
 			case SENIOR_ADMIN:
-				
 				for (FilterItem filter : request.getFilterItems()) {
 					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
 					if (boxes != null && boxes.size() >= 0) {
@@ -131,20 +132,22 @@ public class BeeBoxGroupController {
 				}
 				return Response.success(beeBoxes);
 			case ORGANIZATION_ADMIN:
-				List<Long> organizationIds = organizationService.getIdsByAdminId(admin.getId());
-				List<Long> beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
-				if(beeFarmerIds==null || beeFarmerIds.size()==0) {
-					return Response.success(null);
-				}
-				for (FilterItem filter : request.getFilterItems()) {
-					filter.setBeeFarmerIds(beeFarmerIds);
-					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
-					if (boxes != null && boxes.size() >= 0) {
-						beeBoxes.addAll(boxes);
+				organizationIds = organizationService.getIdsByAdminId(admin.getId());
+				if(organizationIds!=null && organizationIds.size()>0) {
+					beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
+					if(beeFarmerIds==null || beeFarmerIds.size()==0) {
+						return Response.success(null);
 					}
-				}
-				if(beeBoxes!=null && beeBoxes.size()>0) {
-					Collections.sort(beeBoxes);
+					for (FilterItem filter : request.getFilterItems()) {
+						filter.setBeeFarmerIds(beeFarmerIds);
+						boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+						if (boxes != null && boxes.size() >= 0) {
+							beeBoxes.addAll(boxes);
+						}
+					}
+					if(beeBoxes!=null && beeBoxes.size()>0) {
+						Collections.sort(beeBoxes);
+					}
 				}
 				return Response.success(beeBoxes);
 			case NO_ORGANIZATION_ADMIN:
@@ -198,7 +201,7 @@ public class BeeBoxGroupController {
 			}
 			request.getBeeBoxGroup().setAdminId(admin.getId());
 			request.getBeeBoxGroup().setCreateDate(new Date());
-			BeeBoxGroup savedBeeBoxGroup = beeBoxGroupRepository.save(beeBoxGroup);
+			BeeBoxGroup savedBeeBoxGroup = beeBoxGroupRepository.save(request.getBeeBoxGroup());
 			BeeBoxGroupAssociation beeBoxGroupAssociation = null;
 			List<BeeBoxGroupAssociation> associations = new LinkedList<BeeBoxGroupAssociation>();
 			for(Long id: request.getBeeBoxIds()) {
@@ -210,7 +213,7 @@ public class BeeBoxGroupController {
 			}
 			List<BeeBoxGroupAssociation> savedAssociations = beeBoxGroupAssociationRepository.saveAll(associations);
 			savedBeeBoxGroup.setBeeBoxNum(savedAssociations.size());
-			beeBoxGroupRepository.save(beeBoxGroup);
+			beeBoxGroupRepository.save(savedBeeBoxGroup);
 			return Response.success(null);
 		} catch (BusinessException e) {
 			logger.error(e.getMessage(), e);

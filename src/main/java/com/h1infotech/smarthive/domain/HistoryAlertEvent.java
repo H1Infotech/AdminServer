@@ -18,6 +18,7 @@ public class HistoryAlertEvent {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private Long beeBoxId;
 	private Long adminId;
 	private String event;
 	private String handleWay;
@@ -29,6 +30,16 @@ public class HistoryAlertEvent {
 		return id+"_"+event+"_"+handleWay+"_"+createDate==null?null:df3.format(createDate);
 	}
 	
+	public Long getBeeBoxId() {
+		return beeBoxId;
+	}
+
+	public void setBeeBoxId(Long beeBoxId) {
+		this.beeBoxId = beeBoxId;
+	}
+
+
+
 	public Long getId() {
 		return id;
 	}
