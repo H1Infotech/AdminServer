@@ -116,6 +116,7 @@ public class BeeFarmerController {
 				throw new BusinessException(BizCodeEnum.NO_RIGHT);
 			}
 			beeFarmerService.delete(request.getIds());
+
 			return Response.success(null);
 		} catch (BusinessException e) {
 			logger.error("====Delete Organization Error====", e);

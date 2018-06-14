@@ -109,7 +109,7 @@ public class OrganizationAddUpdateRequest {
 		Organization organization = new Organization();
 		organization.setOrganizationName(organizationName);
 		organization.setEmail(email);
-		organization.setMemberNum(memberNum);
+		organization.setMemberNum(0);
 		organization.setContactName(contactName);
 		organization.setContactPhone(contactPhone);
 		organization.setCreateDate(new Date());

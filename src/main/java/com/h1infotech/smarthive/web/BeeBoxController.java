@@ -56,6 +56,7 @@ import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.BeeBoxSensorDataRequest;
 import com.h1infotech.smarthive.web.request.BeeBoxPageRetrievalRequest;
 import com.h1infotech.smarthive.repository.HistoryAlertEventRepository;
+import com.h1infotech.smarthive.repository.IntervalSensorDataRepository;
 import com.h1infotech.smarthive.web.response.BeeBoxPageRetrievalResponse;
 
 @RestController
@@ -96,6 +97,9 @@ public class BeeBoxController {
 	
 	@Autowired
 	IntervalSensorDataService intervalSensorDataService;
+	
+	@Autowired
+	IntervalSensorDataRepository intervalSensorDataRepository;
 	
 	@Autowired
 	BeeBoxGroupRepository beeBoxGroupRepository;
@@ -304,13 +308,21 @@ public class BeeBoxController {
     		if(beeBoxes==null || beeBoxes.size()==0) {
     			return Response.success(null);
     		}
+    		List<String> beeBoxNos = new LinkedList<String>();
     		Map<Long, Integer> beeBoxNumMap = new HashMap<Long, Integer>();
     		for(BeeBox beeBox: beeBoxes) {
+    			if(beeBox!=null && !StringUtils.isEmpty(beeBox.getBeeBoxNo())) {
+    				beeBoxNos.add(beeBox.getBeeBoxNo());
+    			}
     			if(beeBox!=null && beeBox.getFarmerId()!=null) {
     				Integer num = beeBoxNumMap.get(beeBox.getFarmerId());
     				num = num==null?0:num+1;
     				beeBoxNumMap.put(beeBox.getFarmerId(), num);
     			}
+    		}
+    		if(beeBoxNos.size()>0) {
+    			intervalSensorDataRepository.deleteByBeeBoxNoIn(beeBoxNos);
+        		sensorDataRepository.deleteByBeeBoxNoIn(beeBoxNos);
     		}
     		if(beeBoxNumMap.keySet()!=null && beeBoxNumMap.keySet().size()>0) {
     			for(Long farmerId: beeBoxNumMap.keySet()) {
@@ -361,7 +373,7 @@ public class BeeBoxController {
     public Response<List<SensorData>> getBeeBoxSensorData(HttpServletRequest httpRequest, @RequestBody BeeBoxSensorDataRequest request){
     	try {
     		logger.info("====Catching the Request for Sensor Data for beeBox Id====", JSONObject.toJSONString(request));
-    		if(request==null || request.getBeeBoxNos()==null || request.getBeeBoxNos().size()==0) {
+    		if(request==null || request.getBeeBoxNos()==null || request.getBeeBoxNos().size()==0 || request.getSensorDataTag()==null) {
     			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
     		}
     		List<BeeBox> beeBoxes = beeBoxRepository.findByBeeBoxNoIn(request.getBeeBoxNos());
@@ -371,13 +383,15 @@ public class BeeBoxController {
     		List<SensorData> sensorData = new LinkedList<SensorData>();
     		List<Long> latestSensorDataIds = new LinkedList<Long>();
     		for(BeeBox beeBox: beeBoxes) {
-    			if(beeBox.getLatestSensorDataId()!=null) {
-    				latestSensorDataIds.add(beeBox.getLatestSensorDataId());
-    			}else {
+    			Long latestSensorDataId = beeBox.getLatestSensorDataId();
+    			
+    			if(latestSensorDataId==null) {
     				SensorData data = new SensorData();
     				data.setBeeBoxNo(beeBox.getBeeBoxNo());
     				data.setStatus(BeeBoxStatusEnum.OFFLINE_STATUS.getStatus());
     				sensorData.add(data);
+    			}else if(request.getSensorDataTag().get(beeBox.getBeeBoxNo())==null || beeBox.getLatestSensorDataId()>(request.getSensorDataTag().get(beeBox.getBeeBoxNo()))) {
+    				latestSensorDataIds.add(beeBox.getLatestSensorDataId());
     			}
     		}
     		

@@ -4,9 +4,13 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import com.h1infotech.smarthive.domain.SensorData;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface SensorDataRepository extends JpaRepository<SensorData, Long>{
 	void deleteByFarmerIdIn(List<Long> ids);
+	
+	@Transactional
+	void deleteByBeeBoxNoIn(List<String> beeBoxNos);
 	
 	List<SensorData> findByIdIn(List<Long> ids);
 	

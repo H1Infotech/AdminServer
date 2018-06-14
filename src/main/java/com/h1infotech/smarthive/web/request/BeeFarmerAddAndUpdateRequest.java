@@ -126,7 +126,6 @@ public class BeeFarmerAddAndUpdateRequest {
 	public BeeFarmer getBeeFarmerAdd() {
 		BeeFarmer beeFarmer = new BeeFarmer();
 		beeFarmer.setName(name);
-		//beeFarmer.set username;
 		beeFarmer.setAddress(address); 
 		beeFarmer.setCreateDate(new Date());
 		beeFarmer.setUpdateDate(new Date());
@@ -136,7 +135,7 @@ public class BeeFarmerAddAndUpdateRequest {
 		beeFarmer.setEmail(email);
 		beeFarmer.setStatus(status); 
 		beeFarmer.setFirstTimeLogin(firstTimeLogin); 
-		beeFarmer.setBeeBoxNum(beeBoxNum);
+		beeFarmer.setBeeBoxNum(0);
 		return beeFarmer;
 	}
 	

@@ -1,6 +1,7 @@
 package com.h1infotech.smarthive.service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.List;
 import org.slf4j.Logger;
 import java.util.HashMap;
@@ -219,7 +220,27 @@ public class BeeFarmerServiceImpl implements BeeFarmerService{
 		intervalSensorDataRepository.deleteByFarmerIdIn(ids);
 		sensorDataRepository.deleteByFarmerIdIn(ids);
 		beeBoxRepository.deleteByFarmerIdIn(ids);
-		beeFarmerRepository.deleteByIdIn(ids);
+	    List<BeeFarmer> beeFarmers = beeFarmerRepository.deleteByIdIn(ids);
+	    if(beeFarmers!=null && beeFarmers.size()>0) {
+		    Map<Long, Integer> organizationMap = new HashMap<Long, Integer>();
+	    	for(BeeFarmer beeFarmer: beeFarmers) {
+	    		if(beeFarmer!=null && beeFarmer.getOrganizationId()!=null) {
+	    			Integer num = organizationMap.get(beeFarmer.getOrganizationId());
+	    			num = num==null?0:num+1;
+	    			organizationMap.put(beeFarmer.getOrganizationId(), num);
+	    		}
+	    	}
+	    	for(Long id: organizationMap.keySet()) {
+	    		Optional<Organization> organization = organizationRepository.findById(id);
+	    		if(organization.isPresent()) {
+	    			int orginalNum = organization.get().getMemberNum()==null?0:organization.get().getMemberNum();
+	    			int curNum =  orginalNum - organizationMap.get(id);
+	    			curNum = curNum<0?0:curNum;
+	    			organization.get().setMemberNum(curNum);
+	    			organizationRepository.save(organization.get());
+	    		}
+	    	}
+	    }
 	}
 
 }
