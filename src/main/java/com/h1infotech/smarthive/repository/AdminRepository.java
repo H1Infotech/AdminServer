@@ -8,12 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface AdminRepository extends PagingAndSortingRepository<Admin, Long> {
 	Admin findDistinctFirstByUsername(String username);
-	@Transactional
 	void deleteByIdIn(List<Long> ids);
 	Page<Admin> findByTypeNotAndIdNot(Integer type, long excludeId, Pageable page);
 	List<Admin> findByTypeNotAndIdNot(Integer type, long excludeId);

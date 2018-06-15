@@ -80,6 +80,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST).permitAll().antMatchers("/register**").permitAll()
                 .antMatchers(HttpMethod.POST).permitAll().antMatchers("/adminUpdatePassword**").permitAll()
                 .antMatchers(HttpMethod.POST).permitAll().antMatchers("/adminSMSService**").permitAll()
+                .antMatchers(HttpMethod.GET).permitAll().antMatchers("/checkTokenExpiration**").permitAll()
                 .anyRequest().authenticated();
         //  httpSecurity.headers().cacheControl();
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

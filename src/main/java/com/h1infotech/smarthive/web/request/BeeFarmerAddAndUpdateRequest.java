@@ -134,7 +134,7 @@ public class BeeFarmerAddAndUpdateRequest {
 		beeFarmer.setOrganizationId(organizationId); 
 		beeFarmer.setEmail(email);
 		beeFarmer.setStatus(status); 
-		beeFarmer.setFirstTimeLogin(firstTimeLogin); 
+		beeFarmer.setFirstTimeLogin(true); 
 		beeFarmer.setBeeBoxNum(0);
 		return beeFarmer;
 	}

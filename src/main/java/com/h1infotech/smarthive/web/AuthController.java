@@ -11,7 +11,6 @@ import com.h1infotech.smarthive.service.AuthService;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.web.request.LoginRequest;
 import com.h1infotech.smarthive.common.BusinessException;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

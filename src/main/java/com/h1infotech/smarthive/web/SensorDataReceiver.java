@@ -18,6 +18,7 @@ import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.SmsSender;
 import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.domain.SensorData;
+import com.h1infotech.smarthive.common.BeeBoxStatusEnum;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.domain.SmsSender.KV;
 import com.h1infotech.smarthive.domain.HistoryAlertEvent;
@@ -36,23 +37,23 @@ import com.h1infotech.smarthive.repository.SensorDataRepository;
 import com.h1infotech.smarthive.service.SensorDataEvaluationService;
 import com.h1infotech.smarthive.web.request.RecevierSensorDataRequest;
 import com.h1infotech.smarthive.repository.HistoryAlertEventRepository;
+import com.h1infotech.smarthive.repository.AdminRepository;
 import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
-
 
 @RestController
 @RequestMapping("/api")
 public class SensorDataReceiver {
 
 	private Logger logger = LoggerFactory.getLogger(SensorDataReceiver.class);
-
-	@Autowired
-	SensorDataEvaluationService sensorDataEvaluationService;
 	
 	@Autowired
 	EventRepository eventRepository;
 	
 	@Autowired
 	BeeBoxRepository beeBoxRepository;
+	
+	@Autowired
+	SensorDataEvaluationService sensorDataEvaluationService;
 	
 	@Autowired
 	BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
@@ -67,6 +68,9 @@ public class SensorDataReceiver {
 	HistoryAlertEventRepository historyAlertEventRepository;
 	
 	@Autowired
+	AdminRepository adminRepository;
+	
+	@Autowired
 	SmsSender smsSender;
 	
     @PostMapping(path = "/receiveSensorData")
@@ -74,21 +78,26 @@ public class SensorDataReceiver {
 	public Response<String> receiveSensorData(HttpServletRequest httpRequest, @RequestBody RecevierSensorDataRequest request) {
 		try {
 			logger.info("====Catching the Sensor Data: {}====", JSONObject.toJSONString(request));
-			if (request == null) {
+			if (request == null || StringUtils.isEmpty(request.getBeeBoxNo())) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
+			BeeBox beeBox = beeBoxRepository.findByBeeBoxNo(request.getBeeBoxNo());			
+			if(beeBox==null) {
+				throw new BusinessException(BizCodeEnum.NO_BEE_BOX_INFO);
+			}
+			
 			SensorData sensorData = sensorDataRepository.save(request.getSensorData());
-			BeeBox beeBox = beeBoxRepository.findFirstByFarmerId(request.getFarmerId());			
+			
 			beeBox.setLatestSensorDataId(sensorData.getId());
 			beeBox.setLat(sensorData.getLat());
 			beeBox.setLng(sensorData.getLng());
 			beeBoxRepository.save(beeBox);
+			
 			List<Event> events=null;
 			Set<Long> ids = new HashSet<Long>();
 			List<BeeBoxGroupAssociation> associations = beeBoxGroupAssociationRepository.findByBeeBoxId(beeBox.getId());
-			logger.info("====Alert Rules: {}====",JSONArray.toJSONString(associations));
-			if(associations!=null 
-					&& associations.size()>0) {
+			logger.info("====Associations: {}====",JSONArray.toJSONString(associations));
+			if(associations!=null && associations.size()>0) {
 				for(BeeBoxGroupAssociation one: associations) {
 					ids.add(one.getGroupId());
 				}
@@ -103,6 +112,8 @@ public class SensorDataReceiver {
 				if(!normalStatus) {
 					BeeBox beeBoxDB = beeBoxRepository.findByBeeBoxNo(sensorData.getBeeBoxNo());
 					if(beeBoxDB!=null) {
+						beeBoxDB.setStatus(BeeBoxStatusEnum.ABNORMAL_STATUS.getStatus());
+						beeBoxRepository.save(beeBoxDB);
 						Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(beeBoxDB.getFarmerId());
 						if(beeFarmer.isPresent() && !StringUtils.isEmpty(beeFarmer.get().getMobile())) {
 							KV[] kvs = new KV[4];
@@ -128,17 +139,17 @@ public class SensorDataReceiver {
 							}
 							kvs[2] = new KV("dataType",dataType);
 							kvs[3] = new KV("value", value);
-							String desc = "蜂箱: "+beeBoxDB.getId()+", "+dataType+"异常: "+value;
+							String desc = "蜂箱: "+beeBoxDB.getBeeBoxNo()+", "+dataType+"异常: "+value;
 							HistoryAlertEvent newEvent = new HistoryAlertEvent();
 							newEvent.setAdminId(event.getAdminId());
 							newEvent.setCreateDate(new Date());
+							newEvent.setBeeBoxId(beeBoxDB.getId());
 							newEvent.setEvent(desc);
 							newEvent.setHandleWay(null);
 							historyAlertEventRepository.save(newEvent);
 							smsSender.dispatchSMSService("2298876", beeFarmer.get().getMobile(), kvs);
 						}
 					}
-					
 				}
 			}
 			

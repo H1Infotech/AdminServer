@@ -8,7 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import com.h1infotech.smarthive.domain.Admin;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+import com.h1infotech.smarthive.common.Response;
+import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.domain.Organization;
@@ -16,17 +19,34 @@ import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.h1infotech.smarthive.repository.AdminRightRepository;
+import org.springframework.transaction.annotation.Transactional;
+import com.h1infotech.smarthive.web.request.AdminDeletionRequest;
+import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 import com.h1infotech.smarthive.repository.OrganizationRepository;
 import com.h1infotech.smarthive.web.response.AdminPageRetrievalResponse;
+import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
+	
+	@Autowired
+	BeeFarmerService beeFarmerService;
+	
+    @Autowired
+    private AdminRightRepository adminRightRepository;
 	
 	@Autowired
 	AdminRepository adminRepository;
 	
 	@Autowired
 	OrganizationRepository organizationRepository;
+	
+	@Autowired
+	private BeeBoxGroupRepository beeBoxGroupRepository;
+	
+	@Autowired
+	private BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
 	
 	@Override
 	public Admin getAdminByUserName(String userName) {
@@ -119,4 +139,33 @@ public class AdminServiceImpl implements AdminService {
 		return adminRepository.findByTypeIn(types,sort);
 	}
 
+	@Override
+	@Transactional
+	public Response<String> deleteAdmins(HttpServletRequest httpRequest, AdminDeletionRequest request) {
+		if(request==null || request.getAdminIds()==null || request.getAdminIds().size()==0) {
+			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+		}
+		adminRepository.deleteByIdIn(request.getAdminIds());
+		List<Organization> organizations = organizationRepository.deleteByAdminIdIn(request.getAdminIds());
+		if(organizations!=null && organizations.size()>0) {
+			List<Long> organizationIds = new LinkedList<Long>();
+			for(Organization organization: organizations) {
+				organizationIds.add(organization.getId());
+			}
+			beeFarmerService.wipeOutOrganizationId(organizationIds);
+		}
+		adminRightRepository.deleteByAdminIdIn(request.getAdminIds());
+		List<BeeBoxGroup> beeBoxGroups = beeBoxGroupRepository.deleteByAdminIdIn(request.getAdminIds());
+		if(beeBoxGroups==null||beeBoxGroups.size()==0) {
+			return Response.success(null);
+		}
+		List<Long> beeBoxGroupIds = new LinkedList<Long>();
+		for(BeeBoxGroup beeBoxGroup: beeBoxGroups) {
+			beeBoxGroupIds.add(beeBoxGroup.getId());
+		}
+		if(beeBoxGroupIds!=null && beeBoxGroupIds.size()>0) {
+			beeBoxGroupAssociationRepository.deleteByGroupIdIn(beeBoxGroupIds);
+		}
+		return Response.success(null);
+	}
 }

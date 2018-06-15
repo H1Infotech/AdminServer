@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Iterator;
-import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +15,6 @@ import com.h1infotech.smarthive.common.MyUtils;
 import com.h1infotech.smarthive.common.Response;
 import com.h1infotech.smarthive.domain.SmsSender;
 import com.h1infotech.smarthive.domain.AdminRight;
-import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.domain.Organization;
@@ -35,14 +33,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import com.h1infotech.smarthive.repository.AdminRightRepository;
 import com.h1infotech.smarthive.web.request.AdminDeletionRequest;
-import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 import com.h1infotech.smarthive.repository.OrganizationRepository;
 import com.h1infotech.smarthive.web.request.AmbiguousSearchRequest;
 import com.h1infotech.smarthive.web.request.AdminAlterationRequest;
 import com.h1infotech.smarthive.web.request.AdminPageRetrievalRequest;
 import com.h1infotech.smarthive.web.response.AdminPageRetrievalResponse;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import com.h1infotech.smarthive.repository.BeeBoxGroupAssociationRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -71,14 +67,12 @@ public class AdminController {
     @Autowired
     private AdminRightRepository adminRightRepository;
 	
-	@Autowired
-	private BeeBoxGroupRepository beeBoxGroupRepository;
+
 	
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	
-	@Autowired
-	private BeeBoxGroupAssociationRepository beeBoxGroupAssociationRepository;
+
 	
     @GetMapping(path = "/getAdminInfo")
     @ResponseBody
@@ -93,7 +87,7 @@ public class AdminController {
 			}
 			if(admin.getOrganizationId()!=null) {
 				Optional<Organization> organization = organizationRepository.findById(admin.getOrganizationId());
-				if(organization.isPresent()) {
+				if(organization!=null && organization.isPresent()) {
 					admin.setOrganizationName(organization.get().getOrganizationName());
 				}
 			}
@@ -170,31 +164,7 @@ public class AdminController {
     public Response<String> getAllOrganizationAdmins(HttpServletRequest httpRequest, @RequestBody AdminDeletionRequest request){
     	try {
     		logger.info("====Catching the Request for Deleting Admins：{}====", JSONObject.toJSONString(request));
-    		if(request==null || request.getAdminIds()==null || request.getAdminIds().size()==0) {
-    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
-    		}
-    		adminRepository.deleteByIdIn(request.getAdminIds());
-    		List<Organization> organizations = organizationRepository.deleteByAdminIdIn(request.getAdminIds());
-    		if(organizations!=null && organizations.size()>0) {
-    			List<Long> organizationIds = new LinkedList<Long>();
-    			for(Organization organization: organizations) {
-    				organizationIds.add(organization.getId());
-    			}
-    			beeFarmerService.wipeOutOrganizationId(organizationIds);
-    		}
-    		adminRightRepository.deleteByAdminIdIn(request.getAdminIds());
-    		List<BeeBoxGroup> beeBoxGroups = beeBoxGroupRepository.deleteByAdminIdIn(request.getAdminIds());
-    		if(beeBoxGroups==null||beeBoxGroups.size()==0) {
-    			return Response.success(null);
-    		}
-    		List<Long> beeBoxGroupIds = new LinkedList<Long>();
-    		for(BeeBoxGroup beeBoxGroup: beeBoxGroups) {
-    			beeBoxGroupIds.add(beeBoxGroup.getId());
-    		}
-    		if(beeBoxGroupIds!=null && beeBoxGroupIds.size()>0) {
-    			beeBoxGroupAssociationRepository.deleteByGroupIdIn(beeBoxGroupIds);
-    		}
-			return Response.success(null);
+			return adminService.deleteAdmins(httpRequest, request);
     	} catch(BusinessException e) {
     		logger.error("====Get Organization Admin Error====", e);
     		return Response.fail(e.getCode(),e.getMessage());
@@ -202,7 +172,6 @@ public class AdminController {
     		logger.error("====Get Organization Admin Error====", e);
     		return Response.fail(BizCodeEnum.SERVICE_ERROR);
     	}
-    		
     }
     
 	@PostMapping(path = "/alterAdmin")
@@ -242,6 +211,7 @@ public class AdminController {
 				}
 				alterAdmin = request.getAdmin();
 				alterAdmin.setUsername(userName);
+				alterAdmin.setStatus(0);
 				alterAdmin.setPassword(bCryptPasswordEncoder.encode(alterAdmin.getPassword()));
 				Admin savedAdmin = adminRepository.save(alterAdmin);
 				if(request.getAdminRight()!=null && request.getAdminRight().size()>0) {

@@ -9,6 +9,5 @@ public interface AdminRightRepository extends JpaRepository<AdminRight, Long> {
 	List<AdminRight> findByAdminIdIs(Long adminId);
 	@Transactional
 	void deleteByAdminId(Long id);
-	@Transactional
 	void deleteByAdminIdIn(List<Long> ids);
 }

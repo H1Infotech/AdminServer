@@ -1,6 +1,7 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Date;
 import org.slf4j.Logger;
 import java.util.LinkedList;
@@ -210,6 +211,11 @@ public class BeeBoxGroupController {
 				beeBoxGroupAssociation.setCreateDate(new Date());
 				beeBoxGroupAssociation.setGroupId(savedBeeBoxGroup.getId());
 				associations.add(beeBoxGroupAssociation);
+				Optional<BeeBox> beeBox = beeBoxRepository.findById(id);
+				if(beeBox!=null && beeBox.isPresent()) {
+					beeBox.get().setProtectionStrategy(true);
+					beeBoxRepository.save(beeBox.get());
+				}
 			}
 			List<BeeBoxGroupAssociation> savedAssociations = beeBoxGroupAssociationRepository.saveAll(associations);
 			savedBeeBoxGroup.setBeeBoxNum(savedAssociations.size());
