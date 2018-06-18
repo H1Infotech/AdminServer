@@ -76,12 +76,18 @@ public class AuthController {
     	}
     }
     
+    
+    
     @GetMapping(path = "/checkTokenExpiration")
     @ResponseBody
     public Response<Boolean> checkTokenExpiration(HttpServletRequest httpRequest){
     	try {
-    		return Response.success(jwtTokenUtil.isTokenExpired(httpRequest.getHeader("token")));
-    	} catch(BusinessException e) {
+    		boolean isExpiration = jwtTokenUtil.isTokenExpired(httpRequest.getHeader("token"));
+    		if(!isExpiration) {
+    			return Response.success(null);
+    		}else {
+    			return Response.fail(BizCodeEnum.EXPIRATION_TOKEN);
+    		}    	} catch(BusinessException e) {
     		logger.error("Update Password Error", e);
     		return Response.fail(e.getCode(),e.getMessage());
     	} catch(Exception e) {

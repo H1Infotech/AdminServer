@@ -3,6 +3,7 @@ package com.h1infotech.smarthive.web;
 import java.util.Map;
 import java.util.List;
 import org.slf4j.Logger;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Iterator;
@@ -72,8 +73,6 @@ public class AdminController {
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	
-
-	
     @GetMapping(path = "/getAdminInfo")
     @ResponseBody
     public Response<Object> getAdminInfo(HttpServletRequest httpRequest){
@@ -99,6 +98,47 @@ public class AdminController {
 			logger.error("====Get Paged Admins Error====", e);
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
+    }
+    
+    @PostMapping(path = "/updateAdminInfo")
+    @ResponseBody
+    public Response<Object> getAdminInfo(HttpServletRequest httpRequest, @RequestBody Map<String, Object> request) {
+		try {
+			logger.info("====Catching the Request for Updating Admin Info====");
+			if(request==null || request.get("usename")==null) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			Admin adminDB = adminService.getAdminByUserName((String) request.get("username"));
+			if(adminDB == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			String code = stringRedisTemplate.opsForValue().get(SmsSender.VERIFICATION_CODE_KEY_PREFIX+(String) request.get("mobile"));
+			if(StringUtils.isEmpty(code) 
+					|| !code.equals((String) request.get("code"))) {
+				throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
+			}
+			Admin admin = new Admin();
+			admin.setId((Long) request.get("id"));
+			admin.setName((String) request.get("name"));
+			admin.setUsername((String) request.get("username"));
+			admin.setMobile((String) request.get("mobile"));
+			admin.setCreateDate(adminDB.getCreateDate());
+			admin.setUpdateDate(new Date());
+			admin.setStatus(adminDB.getStatus());
+			admin.setOrganizationId(adminDB.getOrganizationId());
+			admin.setEmail((String) request.get("email"));
+			admin.setType((Integer) request.get("type"));
+			admin.setAddress((String) request.get("address"));
+			adminRepository.save(admin);
+			return Response.success(null);
+		} catch (BusinessException e) {
+			logger.error("====Get Paged Admins Error====", e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("====Get Paged Admins Error====", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+
     }
 	
 	//获取分页管理员

@@ -8,6 +8,7 @@ import com.h1infotech.smarthive.domain.BeeBoxGroupAssociation;
 
 public interface BeeBoxGroupAssociationRepository extends JpaRepository<BeeBoxGroupAssociation, Long> {
 	List<BeeBoxGroupAssociation> findByBeeBoxId(Long beeBoxId);
+	List<BeeBoxGroupAssociation> findByGroupId(Long groupId);
 	@Transactional
 	void deleteByGroupIdIn(List<Long> ids);
 	@Transactional

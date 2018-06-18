@@ -1,10 +1,15 @@
 package com.h1infotech.smarthive.web;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Date;
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Collections;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
@@ -81,6 +86,34 @@ public class BeeBoxGroupController {
 			return Response.fail(BizCodeEnum.LOGIN_ERROR);
 		}
 	}
+	
+	@PostMapping(path = "/getGroupBeeBox")
+	@ResponseBody
+	public Response<List<BeeBox>> queryGroupBeeBox(HttpServletRequest httpRequest, @RequestBody Map<String, Object> request) {
+		try {
+			logger.info("====Catching the Request for Deleting Groups: {}====", JSONObject.toJSONString(request));
+			if(request==null || request.get("groupId")==null) {
+				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			List<BeeBoxGroupAssociation> associations = beeBoxGroupAssociationRepository.findByGroupId((Long)request.get("groupId"));
+			if(associations==null) {
+				return Response.success(null);
+			}
+			Set<Long> beeBoxIds = new HashSet<Long>();
+			for(BeeBoxGroupAssociation association: associations) {
+				beeBoxIds.add(association.getBeeBoxId());
+			}
+			List<Long> beeBoxIdList = new ArrayList<>(beeBoxIds);
+			List<BeeBox> beeBoxes = beeBoxRepository.findByIdIn(beeBoxIdList);
+			return Response.success(beeBoxes);
+		} catch (BusinessException e) {
+			logger.error(e.getMessage(), e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("Login Error", e);
+			return Response.fail(BizCodeEnum.LOGIN_ERROR);
+		}
+	}
 
 	@PostMapping(path = "/deleteGroups")
 	@ResponseBody
@@ -114,6 +147,26 @@ public class BeeBoxGroupController {
 			}
 			if (request == null || request.getFilterItems() == null || request.getFilterItems().size() == 0) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+			}
+			for(FilterItem filter: request.getFilterItems()) {
+				if(filter.getMinBeeBoxNo()!=null && filter.getMaxBatchNo()!=null 
+						&& filter.getMinBeeBoxNo().equals(filter.getMaxBatchNo())) {
+					filter.setBatchNo(filter.getMinBeeBoxNo());
+					filter.setMinBatchNo(null);
+					filter.setMaxBatchNo(null);
+				}
+				if(filter.getMinBeeBoxNo()!=null && filter.getMaxBeeBoxNo()!=null
+						&& filter.getMinBeeBoxNo().equals(filter.getMaxBeeBoxNo())) {
+					filter.setBeeBoxno(filter.getMinBeeBoxNo());
+					filter.setMinBeeBoxNo(null);
+					filter.setMaxBeeBoxNo(null);
+				}
+				if(filter.getMinBatchNo()!=null && filter.getMaxBatchNo()!=null
+						&& filter.getMinBatchNo().equals(filter.getMaxBatchNo())) {
+					filter.setBatchNo(filter.getMinBatchNo());
+					filter.setMinBatchNo(null);
+					filter.setMaxBatchNo(null);
+				}
 			}
 			List<BeeBox> boxes = null;
 			List<Long> organizationIds = null;

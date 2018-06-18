@@ -34,6 +34,7 @@ public class JwtTokenUtil {
     
 	@Autowired
 	private AdminRepository adminRepository;
+	
 	@Autowired
 	AdminRightService adminRightService;
 

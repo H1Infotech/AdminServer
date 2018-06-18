@@ -20,6 +20,7 @@ public enum BizCodeEnum {
 	ILLEGAL_INPUT("000090","Illegal Input Parameter(s)"),
 	BEE_BOX_GROUP_EXISTS("000100","Group Name Already Exists"),
 	BEE_BOX_NUMBER_EXISTS("000110","BEE BOX NO EXISTS"),
+	EXPIRATION_TOKEN("000120","Token Expiration"),
 	SERVICE_ERROR("999999","Service Error"),
 	
 	

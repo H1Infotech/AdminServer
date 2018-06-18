@@ -1,5 +1,6 @@
 package com.h1infotech.smarthive.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import com.h1infotech.smarthive.domain.BeeBox;
@@ -22,6 +23,7 @@ public interface BeeBoxRepository extends JpaRepository<BeeBox, Long>, JpaSpecif
 	@Transactional
 	List<BeeBox> deleteByIdIn(List<Long> ids);
 	void deleteByFarmerIdIn(List<Long> farmerIds);
+	BeeBox findByLatAndLng(BigDecimal lat, BigDecimal lng);
 	void deleteBeeBoxByFarmerIdAndIdIn(Long farmerId, List<Long> ids);
 	
 }

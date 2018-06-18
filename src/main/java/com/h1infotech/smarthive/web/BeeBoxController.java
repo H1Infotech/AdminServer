@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.math.BigDecimal;
 import java.util.Collections;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
@@ -177,6 +178,35 @@ public class BeeBoxController {
 		}
 	}  
     
+    @PostMapping(path = "/getBeeBoxByPosition")
+    @ResponseBody
+    public Response<BeeBox> getBeeBoxes(HttpServletRequest request, @RequestBody Map<String, String> position) {
+    	try {
+    		logger.info("====Catching the Request for Getting Bee Farmer BeeBox By Position: {}====", JSONObject.toJSONString(position));
+    		if(position==null) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
+    		String latStr = position.get("lat");
+    		String lngStr = position.get("lng");
+    		if(StringUtils.isEmpty(latStr) || StringUtils.isEmpty(lngStr)) {
+    			throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
+    		}
+    		BigDecimal lat = new BigDecimal(latStr);
+    		BigDecimal lng = new BigDecimal(lngStr);
+    		BeeBox beeBox = beeBoxRepository.findByLatAndLng(lat, lng);
+    		if(beeBox == null) {
+    			throw new BusinessException(BizCodeEnum.NO_BEE_BOX_INFO);
+    		}
+    		return Response.success(beeBox);
+    	}catch(BusinessException e) {
+    		logger.error(e.getMessage(), e);
+    		return Response.fail(e.getCode(), e.getMessage());
+    	}catch(Exception e) {
+    		logger.error("getBeeBoxByPosition",e);
+    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    	}
+    }
+	
     @PostMapping(path = "/getPagedBeeBoxes")
     @ResponseBody
     public Response<BeeBoxPageRetrievalResponse> getPagedBeeBoxes(HttpServletRequest httpRequest, @RequestBody BeeBoxPageRetrievalRequest request) {
@@ -457,7 +487,7 @@ public class BeeBoxController {
     				response.setProtectionNum(response.getProtectionNum()+1);
     			}
     			if(beeBox.getStatus()!=null ) {
-    				if(beeBox.getStatus()==BeeBoxStatusEnum.RUNNING_STATUS.getStatus()) {
+    				if(beeBox.getStatus()==BeeBoxStatusEnum.RUNNING_STATUS.getStatus()|| beeBox.getStatus()==BeeBoxStatusEnum.NORMAL_STATUS.getStatus()) {
     					response.setNormalBeeBoxNum(response.getNormalBeeBoxNum()+1);
     					response.setRunningBeeBoxNum(response.getRunningBeeBoxNum()+1);
     				}else if(beeBox.getStatus()==BeeBoxStatusEnum.OFFLINE_STATUS.getStatus()) {

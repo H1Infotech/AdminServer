@@ -49,6 +49,7 @@ public class IntervalSensorDataServiceImpl implements IntervalSensorDataService 
 					battery /= batchSize;
 					IntervalSensorData intervalSensorData = new IntervalSensorData();
 					intervalSensorData.setBeeBoxNo(beeBoxNo);
+					intervalSensorData.setCreateDate(sensorData.get(i).getCreateDate());
 					intervalSensorData.setBattery(battery);
 					intervalSensorData.setGravity(gravity);
 					intervalSensorData.setHumidity(humidity);

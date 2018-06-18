@@ -116,14 +116,14 @@ public class BeeBox  implements Comparable<BeeBox> {
 					Expression<Long> exp = root.<Long>get("farmerId");
 					predicates.add(exp.in(filterItem.getBeeFarmerIds()));
 				}
-				if (!StringUtils.isEmpty(filterItem.getBatchNo())) {
-					predicates.add(cb.equal(root.<String>get("beeBoxNo"), filterItem.getBatchNo()));
+				if (!StringUtils.isEmpty(filterItem.getBeeBoxno())) {
+					predicates.add(cb.equal(root.<String>get("beeBoxNo"), filterItem.getBeeBoxno()));
 				}
-				if (!StringUtils.isEmpty(filterItem.getMaxBatchNo())) {
-					predicates.add(cb.lessThan(root.<String>get("beeBoxNo"), filterItem.getMaxBatchNo()));
+				if (!StringUtils.isEmpty(filterItem.getMaxBeeBoxNo())) {
+					predicates.add(cb.lessThanOrEqualTo(root.<String>get("beeBoxNo"), filterItem.getMaxBeeBoxNo()));
 				}
-				if (!StringUtils.isEmpty(filterItem.getMinBatchNo())) {
-					predicates.add(cb.greaterThan(root.<String>get("beeBoxNo"), filterItem.getMinBatchNo()));
+				if (!StringUtils.isEmpty(filterItem.getMinBeeBoxNo())) {
+					predicates.add(cb.greaterThanOrEqualTo(root.<String>get("beeBoxNo"), filterItem.getMinBeeBoxNo()));
 				}
 				if (!StringUtils.isEmpty(filterItem.getBeeFarmerName())) {
 					List<BeeFarmer> beeFarmers = beeFarmerRepository.findByNameLike("%" + filterItem.getBeeFarmerName() + "%");
@@ -146,10 +146,10 @@ public class BeeBox  implements Comparable<BeeBox> {
 					predicates.add(cb.like(root.<String>get("batchNo"), "%" + filterItem.getBatchNo() + "%"));
 				}
 				if (!StringUtils.isEmpty(filterItem.getMinBatchNo())) {
-					predicates.add(cb.greaterThan(root.<String>get("batchNo"), filterItem.getMinBatchNo()));
+					predicates.add(cb.greaterThanOrEqualTo(root.<String>get("batchNo"), filterItem.getMinBatchNo()));
 				}
 				if (!StringUtils.isEmpty(filterItem.getMaxBatchNo())) {
-					predicates.add(cb.lessThan(root.<String>get("batchNo"), filterItem.getMaxBatchNo()));
+					predicates.add(cb.lessThanOrEqualTo(root.<String>get("batchNo"), filterItem.getMaxBatchNo()));
 				}
 				if (filterItem.getProductionDate() != null) {
 					Calendar calendar = new GregorianCalendar();
@@ -162,16 +162,16 @@ public class BeeBox  implements Comparable<BeeBox> {
 					predicates.add(cb.like(root.<String>get("manufacturer"), "%" + filterItem.getManfaucturer() + "%"));
 				}
 				if (filterItem.getMinLatitude() != null) {
-					predicates.add(cb.greaterThan(root.<BigDecimal>get("lat"), filterItem.getMinLatitude()));
+					predicates.add(cb.greaterThanOrEqualTo(root.<BigDecimal>get("lat"), filterItem.getMinLatitude()));
 				}
 				if (filterItem.getMaxLatitude() != null) {
-					predicates.add(cb.lessThan(root.<BigDecimal>get("lat"), filterItem.getMaxLatitude()));
+					predicates.add(cb.lessThanOrEqualTo(root.<BigDecimal>get("lat"), filterItem.getMaxLatitude()));
 				}
 				if (filterItem.getMinLongitude() != null) {
-					predicates.add(cb.greaterThan(root.<BigDecimal>get("lng"), filterItem.getMinLongitude()));
+					predicates.add(cb.greaterThanOrEqualTo(root.<BigDecimal>get("lng"), filterItem.getMinLongitude()));
 				}
 				if (filterItem.getMaxLongitude() != null) {
-					predicates.add(cb.lessThan(root.<BigDecimal>get("lng"), filterItem.getMaxLongitude()));
+					predicates.add(cb.lessThanOrEqualTo(root.<BigDecimal>get("lng"), filterItem.getMaxLongitude()));
 				}
 				return cb.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
