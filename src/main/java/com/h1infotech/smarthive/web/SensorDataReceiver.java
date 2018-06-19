@@ -102,7 +102,7 @@ public class SensorDataReceiver {
 					ids.add(one.getGroupId());
 				}
 				List<Long> idList = new ArrayList<>(ids);
-				events = eventRepository.findByGroupId(idList);
+				events = eventRepository.findByGroupIdIn(idList);
 			}
 			if(events==null || events.size()==0) {
 				return Response.success(null);

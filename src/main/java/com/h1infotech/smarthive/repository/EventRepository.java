@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-	List<Event> findByGroupId(List<Long> groupIds);
+	List<Event> findByGroupIdIn(List<Long> groupIds);
 	List<Event> findByAdminId(Long adminId);
 	List<Event> findByAdminIdIn(List<Long> adminIds);
 	@Transactional

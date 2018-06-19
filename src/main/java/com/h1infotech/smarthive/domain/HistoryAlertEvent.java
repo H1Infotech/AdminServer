@@ -1,13 +1,10 @@
 package com.h1infotech.smarthive.domain;
 
 import java.util.Date;
-import java.util.Locale;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,8 +23,12 @@ public class HistoryAlertEvent {
 
 	@JsonIgnore
 	public String getDesc() {
-    	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
-		return id+"_"+event+"_"+handleWay+"_"+createDate==null?null:df3.format(createDate);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+		String desc = id+"_"+event+"_"+handleWay+"_";
+		if(createDate!=null) {
+			desc += formatter.format(createDate);
+		}
+		return desc;
 	}
 	
 	public Long getBeeBoxId() {

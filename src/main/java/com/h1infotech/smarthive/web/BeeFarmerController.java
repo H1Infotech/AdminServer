@@ -23,6 +23,8 @@ import com.h1infotech.smarthive.common.AdminTypeEnum;
 import com.h1infotech.smarthive.common.AdminRightEnum;
 import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.BusinessException;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.service.OrganizationService;
@@ -88,6 +90,37 @@ public class BeeFarmerController {
     		case NO_ORGANIZATION_ADMIN:
     			response = beeFarmerService.getBeeFarmersWithoutOrganization(request.getPageNo(), request.getPageSize());
     			break;
+    		}
+    		return Response.success(response);
+    	} catch(BusinessException e) {
+    		logger.error("====Get Page Organization Error====", e);
+    		return Response.fail(e.getCode(),e.getMessage());
+    	} catch(Exception e) {
+    		logger.error("====Get Page Organization Error====", e);
+    		return Response.fail(BizCodeEnum.SERVICE_ERROR);
+    	}
+	}
+    
+    @GetMapping(path = "/getAllFarmers")
+    @ResponseBody
+	public Response<Object> getAllFarmers(HttpServletRequest httpRequest){
+    	try {
+    		logger.info("====Catching the Request for Getting All Bee Farmers====");
+    		Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+    		logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+    		if(admin==null) {
+    			throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+    		}
+    		BeeFarmerPageRetrievalResponse response = null;
+    		switch(AdminTypeEnum.getEnum(admin.getType())) {
+    		case SUPER_ADMIN:
+    		case SENIOR_ADMIN:
+    			return Response.success(beeFarmerService.getAllBeeFarmers());
+    		case ORGANIZATION_ADMIN:
+    			List<Long> ids = organizationService.getIdsByAdminId(admin.getId());
+    			return Response.success(beeFarmerService.getBeeFarmersByOrganizationIdIn(ids));
+    		case NO_ORGANIZATION_ADMIN:
+    			return Response.success(beeFarmerService.getBeeFarmersWithoutOrganization());
     		}
     		return Response.success(response);
     	} catch(BusinessException e) {
@@ -245,7 +278,8 @@ public class BeeFarmerController {
 			if (beeFarmers != null && beeFarmers.size() > 0) {
 				Iterator<BeeFarmer> iterator = beeFarmers.iterator();
 				while (iterator.hasNext()) {
-					if (iterator.next().getDesc().indexOf(request.getKeyword()) == -1) {
+					String desc = iterator.next().getDesc();
+					if (desc.indexOf(request.getKeyword()) == -1) {
 						iterator.remove();
 					}
 				}

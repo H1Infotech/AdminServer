@@ -104,8 +104,8 @@ public class AdminController {
     @ResponseBody
     public Response<Object> getAdminInfo(HttpServletRequest httpRequest, @RequestBody Map<String, Object> request) {
 		try {
-			logger.info("====Catching the Request for Updating Admin Info====");
-			if(request==null || request.get("usename")==null) {
+			logger.info("====Catching the Request for Updating Admin Info: {}====",JSONObject.toJSONString(request));
+			if(request==null || request.get("username")==null) {
 				throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
 			}
 			Admin adminDB = adminService.getAdminByUserName((String) request.get("username"));
@@ -118,7 +118,7 @@ public class AdminController {
 				throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
 			}
 			Admin admin = new Admin();
-			admin.setId((Long) request.get("id"));
+			admin.setId(Long.parseLong(String.valueOf(request.get("id"))));
 			admin.setName((String) request.get("name"));
 			admin.setUsername((String) request.get("username"));
 			admin.setMobile((String) request.get("mobile"));
@@ -132,10 +132,10 @@ public class AdminController {
 			adminRepository.save(admin);
 			return Response.success(null);
 		} catch (BusinessException e) {
-			logger.error("====Get Paged Admins Error====", e);
+			logger.error("updateAdminInfo", e);
 			return Response.fail(e.getCode(), e.getMessage());
 		} catch (Exception e) {
-			logger.error("====Get Paged Admins Error====", e);
+			logger.error("updateAdminInfo", e);
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 
@@ -227,11 +227,11 @@ public class AdminController {
 			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
 
 			Admin alterAdmin = null;
-			
+			Admin savedAdmin = null;
         	String code = stringRedisTemplate.opsForValue().get(SmsSender.VERIFICATION_CODE_KEY_PREFIX+request.getMobile());
 
         	if(!StringUtils.isEmpty(code)) {
-        		if(code.equals(request.getCode())) {
+        		if(!code.equals(request.getCode())) {
     				throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
         		}
         	}
@@ -253,7 +253,7 @@ public class AdminController {
 				alterAdmin.setUsername(userName);
 				alterAdmin.setStatus(0);
 				alterAdmin.setPassword(bCryptPasswordEncoder.encode(alterAdmin.getPassword()));
-				Admin savedAdmin = adminRepository.save(alterAdmin);
+				savedAdmin = adminRepository.save(alterAdmin);
 				if(request.getAdminRight()!=null && request.getAdminRight().size()>0) {
 					for(AdminRight adminRight: request.getAdminRight()) {
 						adminRight.setAdminId(savedAdmin.getId());
@@ -280,9 +280,9 @@ public class AdminController {
 						adminRightRepository.save(adminRight);
 					}
 				}
+				savedAdmin = adminRepository.save(alterAdmin);
 			}
-			adminRepository.save(alterAdmin);
-			return Response.success(null);
+			return Response.success(savedAdmin);
 		} catch (BusinessException e) {
 			logger.error("====Add | Update Admin Error====", e);
 			return Response.fail(e.getCode(), e.getMessage());
@@ -326,9 +326,9 @@ public class AdminController {
 			return Response.success(res);
 		}
 		Map<String,Object> res = new HashMap<String, Object>();
-		res.put("totalPageNo", request.getPageNo());
-		res.put("currentPageNo", request.getPageSize());
-		res.put("admins", admins);
+		res.put("totalPageNo", Math.ceil(admins.size()*1.0/request.getPageSize()));
+		res.put("currentPageNo", request.getPageNo());
+		res.put("admins", admins.subList(startIndex, endIndex));
 		return Response.success(res);
 	}
 }

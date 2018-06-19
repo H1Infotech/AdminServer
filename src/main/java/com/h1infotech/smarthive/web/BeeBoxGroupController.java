@@ -5,17 +5,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 import org.slf4j.Logger;
 import java.util.LinkedList;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.apache.commons.lang3.StringUtils;
 import com.h1infotech.smarthive.domain.Admin;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import com.h1infotech.smarthive.domain.BeeBox;
 import com.h1infotech.smarthive.common.Response;
@@ -30,12 +40,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.BeeBoxRepository;
+import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.h1infotech.smarthive.domain.BeeBoxGroupAssociation;
+import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 import com.h1infotech.smarthive.web.request.SaveBeeBoxGroupRequest;
 import com.h1infotech.smarthive.web.request.QueryGroupBeeBoxRequest;
@@ -48,6 +60,10 @@ public class BeeBoxGroupController {
 
 	private Logger logger = LoggerFactory.getLogger(BeeBoxGroupController.class);
 
+	
+	@Autowired
+	private BeeFarmerRepository beeFarmerRepository;
+	
 	@Autowired
 	JwtTokenUtil jwtTokenUtil;
 
@@ -171,14 +187,21 @@ public class BeeBoxGroupController {
 			List<BeeBox> boxes = null;
 			List<Long> organizationIds = null;
 			List<Long> beeFarmerIds = null;
+			Set<Long> beeBoxIds = new HashSet<Long>();
 			List<BeeBox> beeBoxes = new LinkedList<BeeBox>();
 			switch (AdminTypeEnum.getEnum(admin.getType())) {
 			case SUPER_ADMIN:
 			case SENIOR_ADMIN:
 				for (FilterItem filter : request.getFilterItems()) {
-					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+					Specification<BeeBox> specs = getCondition(filter);
+					boxes = beeBoxRepository.findAll(specs);
 					if (boxes != null && boxes.size() >= 0) {
-						beeBoxes.addAll(boxes);
+						for(BeeBox beeBox: boxes) {
+							if(!beeBoxIds.contains(beeBox.getId())) {
+								beeBoxes.add(beeBox);
+								beeBoxIds.add(beeBox.getId());
+							}
+						}
 					}
 				}
 				if(beeBoxes!=null && beeBoxes.size()>0) {
@@ -194,9 +217,14 @@ public class BeeBoxGroupController {
 					}
 					for (FilterItem filter : request.getFilterItems()) {
 						filter.setBeeFarmerIds(beeFarmerIds);
-						boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+						boxes = beeBoxRepository.findAll(getCondition(filter));
 						if (boxes != null && boxes.size() >= 0) {
-							beeBoxes.addAll(boxes);
+							for(BeeBox beeBox: boxes) {
+								if(!beeBoxIds.contains(beeBox.getId())) {
+									beeBoxes.add(beeBox);
+									beeBoxIds.add(beeBox.getId());
+								}
+							}
 						}
 					}
 					if(beeBoxes!=null && beeBoxes.size()>0) {
@@ -211,9 +239,15 @@ public class BeeBoxGroupController {
 				}
 				for (FilterItem filter : request.getFilterItems()) {
 					filter.setBeeFarmerIds(beeFarmerIds);
-					boxes = beeBoxRepository.findAll(BeeBox.getCondition(filter));
+					Specification<BeeBox> specs = getCondition(filter);
+					boxes = beeBoxRepository.findAll(specs);
 					if (boxes != null && boxes.size() >= 0) {
-						beeBoxes.addAll(boxes);
+						for(BeeBox beeBox: boxes) {
+							if(!beeBoxIds.contains(beeBox.getId())) {
+								beeBoxes.add(beeBox);
+								beeBoxIds.add(beeBox.getId());
+							}
+						}
 					}
 				}
 				if(beeBoxes!=null && beeBoxes.size()>0) {
@@ -226,7 +260,7 @@ public class BeeBoxGroupController {
 			logger.error(e.getMessage(), e);
 			return Response.fail(e.getCode(), e.getMessage());
 		} catch (Exception e) {
-			logger.error("Login Error", e);
+			logger.error("queryGroupBeeBox", e);
 			return Response.fail(BizCodeEnum.LOGIN_ERROR);
 		}
 	}
@@ -281,5 +315,78 @@ public class BeeBoxGroupController {
 			logger.error("Login Error", e);
 			return Response.fail(BizCodeEnum.LOGIN_ERROR);
 		}
+	}
+	
+	public Specification<BeeBox> getCondition(FilterItem filterItem) {
+		return new Specification<BeeBox>() {
+			private static final long serialVersionUID = -4421852559886689923L;
+			@Override
+			public Predicate toPredicate(Root<BeeBox> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+				System.err.println("====Filter: " + JSONObject.toJSONString(filterItem) + "====");
+
+				List<Predicate> predicates = new ArrayList<>();
+				if(filterItem.getBeeFarmerIds()!=null && filterItem.getBeeFarmerIds().size()>0) {
+					Expression<Long> exp = root.<Long>get("farmerId");
+					predicates.add(exp.in(filterItem.getBeeFarmerIds()));
+				}
+				if (!StringUtils.isEmpty(filterItem.getBeeBoxno())) {
+					predicates.add(cb.equal(root.<String>get("beeBoxNo"), filterItem.getBeeBoxno()));
+				}
+				if (!StringUtils.isEmpty(filterItem.getMaxBeeBoxNo())) {
+					predicates.add(cb.lessThanOrEqualTo(root.<String>get("beeBoxNo"), filterItem.getMaxBeeBoxNo()));
+				}
+				if (!StringUtils.isEmpty(filterItem.getMinBeeBoxNo())) {
+					predicates.add(cb.greaterThanOrEqualTo(root.<String>get("beeBoxNo"), filterItem.getMinBeeBoxNo()));
+				}
+				if (!StringUtils.isEmpty(filterItem.getBeeFarmerName())) {
+					List<BeeFarmer> beeFarmers = beeFarmerRepository.findByNameLike("%" + filterItem.getBeeFarmerName() + "%");
+					List<Long> ids = new LinkedList<Long>();
+					for(BeeFarmer beeFarmer: beeFarmers) {
+						ids.add(beeFarmer.getId());
+					}
+					if (ids != null && ids.size() > 0) {
+						predicates.add(root.<Long>get("farmerId").in(ids));
+					}
+				}
+				if (filterItem.getBeeFarmerId() != null) {
+					Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(filterItem.getBeeFarmerId());
+					if (beeFarmer != null) {
+						predicates.add(cb.equal(root.<Long>get("farmerId"), beeFarmer.get().getId()));
+					}
+				}
+				if (!StringUtils.isEmpty(filterItem.getBatchNo())) {
+					predicates.add(cb.like(root.<String>get("batchNo"), "%" + filterItem.getBatchNo() + "%"));
+				}
+				if (!StringUtils.isEmpty(filterItem.getMinBatchNo())) {
+					predicates.add(cb.greaterThanOrEqualTo(root.<String>get("batchNo"), filterItem.getMinBatchNo()));
+				}
+				if (!StringUtils.isEmpty(filterItem.getMaxBatchNo())) {
+					predicates.add(cb.lessThanOrEqualTo(root.<String>get("batchNo"), filterItem.getMaxBatchNo()));
+				}
+				if (filterItem.getProductionDate() != null) {
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(filterItem.getProductionDate());
+					calendar.add(Calendar.DATE, 1);
+					Date maxDate = calendar.getTime();
+					predicates.add(cb.between(root.<Date>get("productionDate"), filterItem.getProductionDate(), maxDate));
+				}
+				if(!StringUtils.isEmpty(filterItem.getManfaucturer())) {
+					predicates.add(cb.like(root.<String>get("manufacturer"), "%" + filterItem.getManfaucturer() + "%"));
+				}
+				if (filterItem.getMinLatitude() != null) {
+					predicates.add(cb.greaterThanOrEqualTo(root.<BigDecimal>get("lat"), filterItem.getMinLatitude()));
+				}
+				if (filterItem.getMaxLatitude() != null) {
+					predicates.add(cb.lessThanOrEqualTo(root.<BigDecimal>get("lat"), filterItem.getMaxLatitude()));
+				}
+				if (filterItem.getMinLongitude() != null) {
+					predicates.add(cb.greaterThanOrEqualTo(root.<BigDecimal>get("lng"), filterItem.getMinLongitude()));
+				}
+				if (filterItem.getMaxLongitude() != null) {
+					predicates.add(cb.lessThanOrEqualTo(root.<BigDecimal>get("lng"), filterItem.getMaxLongitude()));
+				}
+				return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		};
 	}
 }

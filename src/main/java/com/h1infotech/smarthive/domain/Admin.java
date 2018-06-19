@@ -2,9 +2,8 @@ package com.h1infotech.smarthive.domain;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.io.Serializable;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import javax.persistence.Id;
 import java.util.stream.Stream;
@@ -48,12 +47,17 @@ public class Admin implements Serializable, UserDetails {
     
     @JsonIgnore
     public String getDesc() {
-    	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
-    	
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+
     	String desc = id+"_"+name+"_"+username
-    			        +"_"+mobile+"_"+createDate==null?null:df3.format(createDate)
-    			        +"_"+updateDate==null?null:df3.format(updateDate)+"_"+organizationName
+    			        +"_"+mobile +"_"+organizationName
     			        +"_"+email+"_"+address;
+    	if(createDate!=null) {
+    		desc += formatter.format(createDate);
+    	}
+    	if(updateDate!=null) {
+    		desc += formatter.format(updateDate);
+    	}
     	if(type==2) {
     		desc+="高级管理员";
     	}else if(type==3) {

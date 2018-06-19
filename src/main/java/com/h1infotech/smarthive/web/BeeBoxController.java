@@ -166,7 +166,10 @@ public class BeeBoxController {
 				}
 			}
 			List<SensorData> existSensorData = sensorDataService.getSensorDara(ids);
-			sensorData.addAll(existSensorData);
+			
+			if(existSensorData!=null) {
+				sensorData.addAll(existSensorData);
+			}
 			Collections.sort(sensorData);
 			return Response.success(sensorData);
 		} catch (BusinessException e) {
@@ -314,7 +317,7 @@ public class BeeBoxController {
     			for(BeeBoxGroupAssociation association: associations) {
     				if(association!=null && association.getGroupId()!=null) {
     					Integer num = groupBeeBoxNumMap.get(association.getGroupId());
-        				num = num==null?0:num+1;
+        				num = num==null?1:num+1;
         				groupBeeBoxNumMap.put(association.getGroupId(), num);
     				}
     			}
@@ -346,7 +349,7 @@ public class BeeBoxController {
     			}
     			if(beeBox!=null && beeBox.getFarmerId()!=null) {
     				Integer num = beeBoxNumMap.get(beeBox.getFarmerId());
-    				num = num==null?0:num+1;
+    				num = num==null?1:num+1;
     				beeBoxNumMap.put(beeBox.getFarmerId(), num);
     			}
     		}

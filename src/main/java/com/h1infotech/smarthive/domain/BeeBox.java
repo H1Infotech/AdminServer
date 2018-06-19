@@ -1,32 +1,14 @@
 package com.h1infotech.smarthive.domain;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Calendar;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import javax.persistence.Id;
 import java.math.BigDecimal;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import javax.persistence.Table;
 import javax.persistence.Entity;
-import java.util.GregorianCalendar;
-import javax.persistence.criteria.Root;
-import com.alibaba.fastjson.JSONObject;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import org.apache.commons.lang3.StringUtils;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.h1infotech.smarthive.web.request.FilterItem;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.h1infotech.smarthive.repository.BeeFarmerRepository;
 
 @Entity
 @Table(name = "beeBox")
@@ -57,18 +39,20 @@ public class BeeBox  implements Comparable<BeeBox> {
 
 	@JsonIgnore
 	public String getDesc() {
-    	DateFormat df3 = DateFormat.getDateInstance(DateFormat.FULL, Locale.CHINA);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
     	String desc = id+"_"+farmerId+"_"+batchNo+"_"+beeBoxNo
     			 +"_"+lat+"_"+lng+"_"+manufacturer
     			 +"_"+latestSensorDataId+"_";
+    	
+    	
     	if(entryDate!=null) {
-    		desc += df3.format(entryDate)+"_";
+    		desc += formatter.format(entryDate);
     	}
     	if(productionDate!=null) {
-    		desc += df3.format(productionDate)+"_";
+    		desc += formatter.format(productionDate)+"_";
     	}
     	if(updateSensorDataTime!=null) {
-    		desc += df3.format(updateSensorDataTime)+"_";
+    		desc += formatter.format(updateSensorDataTime)+"_";
     	}
     	if(status ==null) {
     		status=0;
@@ -101,82 +85,9 @@ public class BeeBox  implements Comparable<BeeBox> {
 		}
 	}
 	
-	@Autowired
-	private static BeeFarmerRepository beeFarmerRepository;
-	
-	public static Specification<BeeBox> getCondition(FilterItem filterItem) {
-		return new Specification<BeeBox>() {
-			private static final long serialVersionUID = -4421852559886689923L;
-			@Override
-			public Predicate toPredicate(Root<BeeBox> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-				System.err.println("====Filter: " + JSONObject.toJSONString(filterItem) + "====");
 
-				List<Predicate> predicates = new ArrayList<>();
-				if(filterItem.getBeeFarmerIds()!=null && filterItem.getBeeFarmerIds().size()>0) {
-					Expression<Long> exp = root.<Long>get("farmerId");
-					predicates.add(exp.in(filterItem.getBeeFarmerIds()));
-				}
-				if (!StringUtils.isEmpty(filterItem.getBeeBoxno())) {
-					predicates.add(cb.equal(root.<String>get("beeBoxNo"), filterItem.getBeeBoxno()));
-				}
-				if (!StringUtils.isEmpty(filterItem.getMaxBeeBoxNo())) {
-					predicates.add(cb.lessThanOrEqualTo(root.<String>get("beeBoxNo"), filterItem.getMaxBeeBoxNo()));
-				}
-				if (!StringUtils.isEmpty(filterItem.getMinBeeBoxNo())) {
-					predicates.add(cb.greaterThanOrEqualTo(root.<String>get("beeBoxNo"), filterItem.getMinBeeBoxNo()));
-				}
-				if (!StringUtils.isEmpty(filterItem.getBeeFarmerName())) {
-					List<BeeFarmer> beeFarmers = beeFarmerRepository.findByNameLike("%" + filterItem.getBeeFarmerName() + "%");
-					List<Long> ids = new LinkedList<Long>();
-					if (beeFarmers != null && beeFarmers.size() == 0) {
-						predicates.add(root.<Long>get("farmerId").in(ids));
-					} else {
-						return null;
-					}
-				}
-				if (filterItem.getBeeFarmerId() != null) {
-					Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(filterItem.getBeeFarmerId());
-					if (beeFarmer == null) {
-						return null;
-					} else {
-						predicates.add(cb.equal(root.<Long>get("farmerId"), beeFarmer.get().getId()));
-					}
-				}
-				if (!StringUtils.isEmpty(filterItem.getBatchNo())) {
-					predicates.add(cb.like(root.<String>get("batchNo"), "%" + filterItem.getBatchNo() + "%"));
-				}
-				if (!StringUtils.isEmpty(filterItem.getMinBatchNo())) {
-					predicates.add(cb.greaterThanOrEqualTo(root.<String>get("batchNo"), filterItem.getMinBatchNo()));
-				}
-				if (!StringUtils.isEmpty(filterItem.getMaxBatchNo())) {
-					predicates.add(cb.lessThanOrEqualTo(root.<String>get("batchNo"), filterItem.getMaxBatchNo()));
-				}
-				if (filterItem.getProductionDate() != null) {
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(filterItem.getProductionDate());
-					calendar.add(Calendar.DATE, 1);
-					Date maxDate = calendar.getTime();
-					predicates.add(cb.between(root.<Date>get("productionDate"), filterItem.getProductionDate(), maxDate));
-				}
-				if(!StringUtils.isEmpty(filterItem.getManfaucturer())) {
-					predicates.add(cb.like(root.<String>get("manufacturer"), "%" + filterItem.getManfaucturer() + "%"));
-				}
-				if (filterItem.getMinLatitude() != null) {
-					predicates.add(cb.greaterThanOrEqualTo(root.<BigDecimal>get("lat"), filterItem.getMinLatitude()));
-				}
-				if (filterItem.getMaxLatitude() != null) {
-					predicates.add(cb.lessThanOrEqualTo(root.<BigDecimal>get("lat"), filterItem.getMaxLatitude()));
-				}
-				if (filterItem.getMinLongitude() != null) {
-					predicates.add(cb.greaterThanOrEqualTo(root.<BigDecimal>get("lng"), filterItem.getMinLongitude()));
-				}
-				if (filterItem.getMaxLongitude() != null) {
-					predicates.add(cb.lessThanOrEqualTo(root.<BigDecimal>get("lng"), filterItem.getMaxLongitude()));
-				}
-				return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-			}
-		};
-	}
+	
+
 	
 	public Date getUpdateSensorDataTime() {
 		return updateSensorDataTime;

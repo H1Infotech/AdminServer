@@ -91,9 +91,9 @@ public class HistoryAlertEventController {
     		switch(AdminTypeEnum.getEnum(admin.getType())) {
 			case SUPER_ADMIN:
 			case SENIOR_ADMIN:
-				events = historyAlertEventRepository.findAll();
+				events = historyAlertEventRepository.findAll();break;
 			case ORGANIZATION_ADMIN:
-				events = historyAlertEventRepository.findByAdminId(admin.getId());
+				events = historyAlertEventRepository.findByAdminId(admin.getId());break;
 			case NO_ORGANIZATION_ADMIN:
 				List<Integer> types = new LinkedList<Integer>();
 				types.add(4);
@@ -102,10 +102,10 @@ public class HistoryAlertEventController {
 				for(Admin one: admins) {
 					ids.add(one.getId());
 				}
-				events = historyAlertEventRepository.findByAdminIdIn(ids);
+				events = historyAlertEventRepository.findByAdminIdIn(ids);break;
     		}
     		
-    		if(events!=null && events.size()>0 && request!=null && StringUtils.isEmpty(request.getKeyword())) {
+    		if(events!=null && events.size()>0 && request!=null && !StringUtils.isEmpty(request.getKeyword())) {
     			Iterator<HistoryAlertEvent> iterator = events.iterator();
     			while(iterator.hasNext()) {
     				if(iterator.next().getDesc().indexOf(request.getKeyword())==-1) {
