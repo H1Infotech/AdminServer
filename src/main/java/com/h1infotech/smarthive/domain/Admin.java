@@ -58,12 +58,14 @@ public class Admin implements Serializable, UserDetails {
     	if(updateDate!=null) {
     		desc += formatter.format(updateDate);
     	}
-    	if(type==2) {
-    		desc+="高级管理员";
-    	}else if(type==3) {
-    		desc+="组织管理员";
-    	}else if(type==4) {
-    		desc+="无组织管理员";
+    	if(type!=null) {
+    		if(type==2) {
+    			desc+="高级管理员";
+    		}else if(type==3) {
+    			desc+="组织管理员";
+    		}else if(type==4) {
+    			desc+="无组织管理员";
+    		}
     	}
     	return desc;
     }

@@ -8,6 +8,8 @@ import com.h1infotech.smarthive.common.JwtTokenUtil;
 import org.springframework.security.core.Authentication;
 import com.h1infotech.smarthive.common.BusinessException;
 import com.h1infotech.smarthive.repository.AdminRepository;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
     
     @Override
     @Transactional
-    public String updatePassword(String username, String password, String mobile, String smsCode) {
+    public String updatePassword(String username, String password, String oldPassword,String mobile, String smsCode) {
     	try {
     		Admin admin = adminRepository.findDistinctFirstByUsername(username);
         	if(admin == null) {
@@ -77,6 +79,11 @@ public class AuthServiceImpl implements AuthService {
         	String code = stringRedisTemplate.opsForValue().get(SmsSender.VERIFICATION_CODE_KEY_PREFIX+mobile);
         	if(!smsCode.equals(code)) {
         		throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
+        	}
+        	if(!StringUtils.isEmpty(oldPassword)) {
+        		if(!oldPassword.equals(admin.getPassword())) {
+            		throw new BusinessException(BizCodeEnum.OLD_PASSWORD_ERROR);
+        		}
         	}
     		adminRepository.updatePassword(username, bCryptPasswordEncoder.encode(password));
     		return "Update Sucess";

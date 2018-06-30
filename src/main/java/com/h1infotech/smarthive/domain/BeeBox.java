@@ -5,6 +5,7 @@ import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,7 +29,17 @@ public class BeeBox  implements Comparable<BeeBox> {
 	private Long latestSensorDataId;
 	private Boolean protectionStrategy;
 	private Date updateSensorDataTime;
+	@Transient
+	private Double battery;
 	
+	public Double getBattery() {
+		return battery;
+	}
+
+	public void setBattery(Double battery) {
+		this.battery = battery;
+	}
+
 	public String getBeeBoxNo() {
 		return beeBoxNo;
 	}

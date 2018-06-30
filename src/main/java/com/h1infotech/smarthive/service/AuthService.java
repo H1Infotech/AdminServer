@@ -10,5 +10,5 @@ public interface AuthService {
 
     String refreshToken(String token);
     
-    Object updatePassword(String username, String password, String mobile, String SmsCode);
+    Object updatePassword(String username, String password, String oldPassword, String mobile, String SmsCode);
 }

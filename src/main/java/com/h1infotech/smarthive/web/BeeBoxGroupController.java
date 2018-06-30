@@ -33,6 +33,7 @@ import com.h1infotech.smarthive.domain.BeeBoxGroup;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
 import com.h1infotech.smarthive.common.AdminTypeEnum;
+import com.h1infotech.smarthive.common.BeeBoxStatusEnum;
 import com.h1infotech.smarthive.web.request.FilterItem;
 import com.h1infotech.smarthive.service.BeeFarmerService;
 import com.h1infotech.smarthive.common.BusinessException;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.h1infotech.smarthive.repository.BeeBoxRepository;
 import com.h1infotech.smarthive.repository.BeeFarmerRepository;
+import com.h1infotech.smarthive.repository.SensorDataRepository;
 import com.h1infotech.smarthive.service.OrganizationService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.h1infotech.smarthive.domain.BeeBoxGroupAssociation;
 import com.h1infotech.smarthive.domain.BeeFarmer;
+import com.h1infotech.smarthive.domain.SensorData;
 import com.h1infotech.smarthive.repository.BeeBoxGroupRepository;
 import com.h1infotech.smarthive.web.request.SaveBeeBoxGroupRequest;
 import com.h1infotech.smarthive.web.request.QueryGroupBeeBoxRequest;
@@ -69,6 +72,9 @@ public class BeeBoxGroupController {
 
 	@Autowired
 	BeeBoxRepository beeBoxRepository;
+	
+	@Autowired
+	SensorDataRepository sensorDataRepository;
 	
 	@Autowired
 	BeeFarmerService beeFarmerService;
@@ -153,7 +159,7 @@ public class BeeBoxGroupController {
 	
 	@PostMapping(path = "/queryGroupBeeBox")
 	@ResponseBody
-	public Response<List<BeeBox>> queryGroupBeeBox(HttpServletRequest httpRequest, @RequestBody QueryGroupBeeBoxRequest request) {
+	public Response<Object> queryGroupBeeBox(HttpServletRequest httpRequest, @RequestBody QueryGroupBeeBoxRequest request) {
 		try {
 			logger.info("====Catching the Request for queryGroupBeeBox: {}====", JSONObject.toJSONString(request));
 			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
@@ -188,7 +194,9 @@ public class BeeBoxGroupController {
 			List<Long> organizationIds = null;
 			List<Long> beeFarmerIds = null;
 			Set<Long> beeBoxIds = new HashSet<Long>();
+			List<Long> lastestSensorData = new LinkedList<Long>();
 			List<BeeBox> beeBoxes = new LinkedList<BeeBox>();
+			List<SensorData> sensorData = new LinkedList<SensorData>();
 			switch (AdminTypeEnum.getEnum(admin.getType())) {
 			case SUPER_ADMIN:
 			case SENIOR_ADMIN:
@@ -198,16 +206,32 @@ public class BeeBoxGroupController {
 					if (boxes != null && boxes.size() >= 0) {
 						for(BeeBox beeBox: boxes) {
 							if(!beeBoxIds.contains(beeBox.getId())) {
+								if(beeBox.getLatestSensorDataId()==null) {
+									SensorData data = new SensorData();
+									data.setBeeBoxNo(beeBox.getBeeBoxNo());
+									data.setStatus(BeeBoxStatusEnum.OFFLINE_STATUS.getStatus());
+									sensorData.add(data);
+								}else {
+									lastestSensorData.add(beeBox.getLatestSensorDataId());
+								}
 								beeBoxes.add(beeBox);
 								beeBoxIds.add(beeBox.getId());
 							}
 						}
 					}
+					if(lastestSensorData.size()>0) {
+						List<SensorData> sensorDataDB = sensorDataRepository.findByIdIn(lastestSensorData);
+						if(sensorDataDB.size()>0) {
+							sensorData.addAll(sensorDataDB);
+						}
+						lastestSensorData.clear();
+					}
 				}
+				
 				if(beeBoxes!=null && beeBoxes.size()>0) {
-					Collections.sort(beeBoxes);
+					Collections.sort(sensorData);
 				}
-				return Response.success(beeBoxes);
+				return Response.success(sensorData);
 			case ORGANIZATION_ADMIN:
 				organizationIds = organizationService.getIdsByAdminId(admin.getId());
 				if(organizationIds!=null && organizationIds.size()>0) {
@@ -221,17 +245,33 @@ public class BeeBoxGroupController {
 						if (boxes != null && boxes.size() >= 0) {
 							for(BeeBox beeBox: boxes) {
 								if(!beeBoxIds.contains(beeBox.getId())) {
+									if(beeBox.getLatestSensorDataId()==null) {
+										SensorData data = new SensorData();
+										data.setBeeBoxNo(beeBox.getBeeBoxNo());
+										data.setStatus(BeeBoxStatusEnum.OFFLINE_STATUS.getStatus());
+										sensorData.add(data);
+									}else {
+										lastestSensorData.add(beeBox.getLatestSensorDataId());
+									}
 									beeBoxes.add(beeBox);
 									beeBoxIds.add(beeBox.getId());
 								}
 							}
 						}
 					}
-					if(beeBoxes!=null && beeBoxes.size()>0) {
-						Collections.sort(beeBoxes);
+					if(lastestSensorData.size()>0) {
+						List<SensorData> sensorDataDB = sensorDataRepository.findByIdIn(lastestSensorData);
+						if(sensorDataDB.size()>0) {
+							sensorData.addAll(sensorDataDB);
+						}
+						lastestSensorData.clear();
 					}
 				}
-				return Response.success(beeBoxes);
+				
+				if(beeBoxes!=null && beeBoxes.size()>0) {
+					Collections.sort(sensorData);
+				}
+				return Response.success(sensorData);
 			case NO_ORGANIZATION_ADMIN:
 				beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
 				if(beeFarmerIds==null || beeFarmerIds.size()==0) {
@@ -244,16 +284,31 @@ public class BeeBoxGroupController {
 					if (boxes != null && boxes.size() >= 0) {
 						for(BeeBox beeBox: boxes) {
 							if(!beeBoxIds.contains(beeBox.getId())) {
+								if(beeBox.getLatestSensorDataId()==null) {
+									SensorData data = new SensorData();
+									data.setBeeBoxNo(beeBox.getBeeBoxNo());
+									data.setStatus(BeeBoxStatusEnum.OFFLINE_STATUS.getStatus());
+									sensorData.add(data);
+								}else {
+									lastestSensorData.add(beeBox.getLatestSensorDataId());
+								}
 								beeBoxes.add(beeBox);
 								beeBoxIds.add(beeBox.getId());
 							}
 						}
 					}
+					if(lastestSensorData.size()>0) {
+						List<SensorData> sensorDataDB = sensorDataRepository.findByIdIn(lastestSensorData);
+						if(sensorDataDB.size()>0) {
+							sensorData.addAll(sensorDataDB);
+						}
+						lastestSensorData.clear();
+					}
 				}
 				if(beeBoxes!=null && beeBoxes.size()>0) {
-					Collections.sort(beeBoxes);
+					Collections.sort(sensorData);
 				}
-				return Response.success(beeBoxes);
+				return Response.success(sensorData);
 			}
 			return Response.success(null);
 		} catch (BusinessException e) {

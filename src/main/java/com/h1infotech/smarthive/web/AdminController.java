@@ -125,6 +125,7 @@ public class AdminController {
 			admin.setCreateDate(adminDB.getCreateDate());
 			admin.setUpdateDate(new Date());
 			admin.setStatus(adminDB.getStatus());
+			admin.setPassword(adminDB.getPassword());
 			admin.setOrganizationId(adminDB.getOrganizationId());
 			admin.setEmail((String) request.get("email"));
 			admin.setType((Integer) request.get("type"));

@@ -180,6 +180,74 @@ public class BeeBoxController {
 			return Response.fail(BizCodeEnum.SERVICE_ERROR);
 		}
 	}  
+	
+    @GetMapping(path = "/getBeeBoxCenterPosition")
+    @ResponseBody
+    public Response<Object> getBeeBoxCenterPosition(HttpServletRequest httpRequest) {
+    	try {
+    		logger.info("====Catching the Request for Getting BeeBox Center Position Data====");
+			Admin admin = jwtTokenUtil.getAdmin(httpRequest.getHeader("token"));
+			logger.info("====Admin: {}====", JSONObject.toJSONString(admin));
+			if (admin == null) {
+				throw new BusinessException(BizCodeEnum.NO_USER_INFO);
+			}
+			List<BeeBox> beeBoxes = null;
+			List<Long> beeFarmerIds = null;
+			List<Long> organizationIds = null;
+			switch (AdminTypeEnum.getEnum(admin.getType())) {
+				case SUPER_ADMIN:
+				case SENIOR_ADMIN:
+					beeBoxes = beeBoxService.getAllBeeBoxes();
+					break;
+				case ORGANIZATION_ADMIN:
+					organizationIds = organizationService.getIdsByAdminId(admin.getId());
+					if(organizationIds!=null && organizationIds.size()>0) {
+						beeFarmerIds = beeFarmerService.getBeeFarmerIdsByOrganizationIdIn(organizationIds);
+						if(beeFarmerIds!=null && beeFarmerIds.size()>0) {
+							beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+						}
+					}
+					break;
+				case NO_ORGANIZATION_ADMIN:
+					beeFarmerIds = beeFarmerService.getBeeFarmerIdsWithoutOrganization();
+					if(beeFarmerIds!=null && beeFarmerIds.size()>0) {
+						beeBoxes = beeBoxRepository.findByFarmerIdIn(beeFarmerIds);
+					}
+					break;
+			}
+			int count = 0;
+			BigDecimal latAvg = BigDecimal.ZERO;
+			BigDecimal lngAvg = BigDecimal.ZERO;
+			Map<String, Object> response = new HashMap<String, Object>();
+			response.put("lat", 39.915);
+			response.put("lng", 116.404);
+			if (beeBoxes == null || beeBoxes.size() == 0) {
+				return Response.success(response);
+			}
+			for(BeeBox beeBox: beeBoxes) {
+				if(beeBox.getLat()!=null && beeBox.getLng()!=null) {
+					latAvg = latAvg.add(beeBox.getLat());
+					lngAvg = lngAvg.add(beeBox.getLng());
+					count++;
+				}
+			}
+			if(count>0) {
+				BigDecimal divisor = new BigDecimal(count);
+				latAvg = latAvg.divide(divisor);
+				lngAvg = lngAvg.divide(divisor);
+				response.put("lat", latAvg);
+				response.put("lng", lngAvg);
+			}
+			return Response.success(response);
+    	}catch (BusinessException e) {
+			logger.error(e.getMessage(), e);
+			return Response.fail(e.getCode(), e.getMessage());
+		} catch (Exception e) {
+			logger.error("getBeeBoxCenterPosition", e);
+			return Response.fail(BizCodeEnum.SERVICE_ERROR);
+		}
+    }
+	
     
     @PostMapping(path = "/getBeeBoxByPosition")
     @ResponseBody
@@ -388,6 +456,12 @@ public class BeeBoxController {
     		logger.info("====Catching the Request for Getting BeeBox Id： {}====",JSONObject.toJSONString(beeBoxRequest));
     		Optional<BeeBox> beeBox = beeBoxRepository.findById(beeBoxRequest.getBeeBoxId());
     		if(beeBox.isPresent()) {
+    			if(beeBox.get().getLatestSensorDataId()!=null) {
+    				Optional<SensorData> data = sensorDataRepository.findById(beeBox.get().getLatestSensorDataId());
+    				if(data.isPresent()) {
+    					beeBox.get().setBattery(data.get().getBattery());
+    				}
+    			}
     			return Response.success(beeBox.get());
     		}else {
     			return Response.success(null);
@@ -488,6 +562,8 @@ public class BeeBoxController {
     		for(BeeBox beeBox: beeBoxes) {
     			if(beeBox.getProtectionStrategy()!=null && beeBox.getProtectionStrategy()) {
     				response.setProtectionNum(response.getProtectionNum()+1);
+    			}else if(beeBox.getProtectionStrategy()!=null && !beeBox.getProtectionStrategy()){
+    				response.setNoProtectionNum(response.getNoProtectionNum()+1);
     			}
     			if(beeBox.getStatus()!=null ) {
     				if(beeBox.getStatus()==BeeBoxStatusEnum.RUNNING_STATUS.getStatus()|| beeBox.getStatus()==BeeBoxStatusEnum.NORMAL_STATUS.getStatus()) {

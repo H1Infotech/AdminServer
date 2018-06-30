@@ -6,7 +6,14 @@ public class PasswordUpteRequest {
 	private String smsCode;  
 	private String username;
 	private String password;
+	private String oldPassword;
 	
+	public String getOldPassword() {
+		return oldPassword;
+	}
+	public void setOldPassword(String oldPassword) {
+		this.oldPassword = oldPassword;
+	}
 	public String getMobile() {
 		return mobile;
 	}

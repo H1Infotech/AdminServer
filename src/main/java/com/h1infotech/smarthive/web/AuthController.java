@@ -66,7 +66,7 @@ public class AuthController {
         			|| StringUtils.isEmpty(request.getUsername())) {
         		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
         	}
-    		return Response.success(authService.updatePassword(request.getUsername(), request.getPassword(), request.getMobile(), request.getSmsCode()));
+    		return Response.success(authService.updatePassword(request.getUsername(), request.getPassword(), request.getOldPassword(),request.getMobile(), request.getSmsCode()));
     	} catch(BusinessException e) {
     		logger.error("Update Password Error", e);
     		return Response.fail(e.getCode(),e.getMessage());
