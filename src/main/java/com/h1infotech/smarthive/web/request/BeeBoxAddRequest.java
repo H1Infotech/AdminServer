@@ -21,6 +21,24 @@ public class BeeBoxAddRequest {
 	private Date updateSensorDataTime;
 	private Date entryDate;
 	private Boolean protectionStrategy;
+	private String code;
+	private String mobile;
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
 
 	public BeeBox getBeeBoxAdd() {
 		BeeBox beeBox = new BeeBox();

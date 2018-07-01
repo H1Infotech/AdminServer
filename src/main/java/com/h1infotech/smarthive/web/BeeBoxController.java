@@ -12,6 +12,7 @@ import java.util.Collections;
 import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,8 @@ import com.h1infotech.smarthive.common.Response;
 import org.springframework.data.domain.Pageable;
 import com.h1infotech.smarthive.domain.BeeFarmer;
 import com.h1infotech.smarthive.domain.SensorData;
+import com.h1infotech.smarthive.domain.SmsSender;
+
 import org.springframework.data.domain.PageRequest;
 import com.h1infotech.smarthive.common.BizCodeEnum;
 import com.h1infotech.smarthive.common.JwtTokenUtil;
@@ -68,7 +71,8 @@ public class BeeBoxController {
 	
     @Autowired
     JwtTokenUtil jwtTokenUtil;
-    
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	BeeBoxService beeBoxService;
 	
@@ -619,6 +623,10 @@ public class BeeBoxController {
         		Optional<BeeFarmer> beeFarmer = beeFarmerRepository.findById(request.getFarmerId());
         		if(beeFarmer==null || !beeFarmer.isPresent()) {
         			throw new BusinessException(BizCodeEnum.NO_FARMER_INFO);
+        		}
+        		String smsCode = stringRedisTemplate.opsForValue().get(SmsSender.VERIFICATION_CODE_KEY_PREFIX + request.getMobile());
+        		if (!StringUtils.isEmpty(smsCode) && !smsCode.equals(request.getCode())) {
+        			throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
         		}
         		BeeBox beeBox = request.getBeeBoxAdd();
         		BeeBox beeBoxDB = beeBoxRepository.findByBeeBoxNo(beeBox.getBeeBoxNo());

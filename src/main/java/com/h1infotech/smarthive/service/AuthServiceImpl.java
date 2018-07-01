@@ -82,10 +82,12 @@ public class AuthServiceImpl implements AuthService {
 		if (!smsCode.equals(code)) {
 			throw new BusinessException(BizCodeEnum.WRONG_SMS_CODE);
 		}
-		UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, oldPassword);
-		final Authentication authentication = authenticationManager.authenticate(upToken);
-		if (authentication == null) {
-			throw new BusinessException(BizCodeEnum.OLD_PASSWORD_ERROR);
+		if (!StringUtils.isEmpty(oldPassword)) {
+			UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, oldPassword);
+			final Authentication authentication = authenticationManager.authenticate(upToken);
+			if (authentication == null) {
+				throw new BusinessException(BizCodeEnum.OLD_PASSWORD_ERROR);
+			}
 		}
 		// if(!StringUtils.isEmpty(oldPassword)) {
 		// if(!bCryptPasswordEncoder.encode(oldPassword).equals(admin.getPassword())) {
