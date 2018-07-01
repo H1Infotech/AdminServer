@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+
 import com.h1infotech.smarthive.web.request.PasswordUpteRequest;
 
 @RestController
@@ -67,6 +69,8 @@ public class AuthController {
         		throw new BusinessException(BizCodeEnum.ILLEGAL_INPUT);
         	}
     		return Response.success(authService.updatePassword(request.getUsername(), request.getPassword(), request.getOldPassword(),request.getMobile(), request.getSmsCode()));
+    	} catch(BadCredentialsException e) {
+    		return Response.fail(BizCodeEnum.OLD_PASSWORD_ERROR);
     	} catch(BusinessException e) {
     		logger.error("Update Password Error", e);
     		return Response.fail(e.getCode(),e.getMessage());
